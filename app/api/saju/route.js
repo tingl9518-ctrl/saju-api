@@ -1,4 +1,9 @@
 import { calculateFourPillars } from "manseryeok";
+import OpenAI from "openai";
+
+export const maxDuration = 60;
+
+const MODEL = "gpt-4o-mini";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -72,8 +77,68 @@ function isValidTimeRange({ hour, minute }) {
 }
 
 /**
- * @param {import('manseryeok').FourPillarsDetail} result
+ * @param {import('manseryeok').FourPillarsDetail} pillars
  */
+function pillarsContextForPrompt(pillars) {
+  const o = pillars.toObject();
+  const h = pillars.toHanjaObject();
+  return [
+    `사주 원국(한글): ${pillars.toString()}`,
+    `사주 원국(한자): ${pillars.toHanjaString()}`,
+    `연주: ${o.year} (${h.year.hanja}) — 천간 오행:${pillars.yearElement.stem}, 지지 오행:${pillars.yearElement.branch}`,
+    `월주: ${o.month} (${h.month.hanja}) — 천간 오행:${pillars.monthElement.stem}, 지지 오행:${pillars.monthElement.branch}`,
+    `일주: ${o.day} (${h.day.hanja}) — 일간(일주 천간) 오행:${pillars.dayElement.stem}, 지지 오행:${pillars.dayElement.branch}`,
+    `시주: ${o.hour} (${h.hour.hanja}) — 천간 오행:${pillars.hourElement.stem}, 지지 오행:${pillars.hourElement.branch}`,
+  ].join("\n");
+}
+
+/**
+ * @param {{
+ *   name: string;
+ *   gender: string;
+ *   birth: string;
+ *   time: string;
+ *   pillars: import('manseryeok').FourPillarsDetail;
+ * }} input
+ */
+async function generateAiSummary(input) {
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const pillarBlock = pillarsContextForPrompt(input.pillars);
+
+  const system = `당신은 한국 전통 사주명리(만세력·사주팔자)를 바탕으로 해설을 작성하는 도우미입니다.
+반드시 아래에 주어진 「사주 원국」 데이터만 근거로 서술하세요. 과장·단정·불길한 예언은 피하고, 참고용·오락 목적임을 염두에 둔 부드러운 톤을 유지하세요.
+
+출력은 한국어로 작성하고, 반드시 다음 네 가지 소제목을 순서대로 포함하세요 (각 소제목은 ## 로 시작):
+## 성격
+## 연애
+## 재물
+## 직업
+
+각 항목은 2~4문단 정도로 구체적으로 쓰되, 사주 원국에 나타난 천간·지지·오행 관계와 연결해 설명하세요.`;
+
+  const user = `이름: ${input.name}
+성별: ${input.gender}
+생년월일·시각(입력값): ${input.birth} / ${input.time}
+
+${pillarBlock}`;
+
+  const completion = await client.chat.completions.create({
+    model: MODEL,
+    messages: [
+      { role: "system", content: system },
+      { role: "user", content: user },
+    ],
+    temperature: 0.65,
+    max_tokens: 2000,
+  });
+
+  const text = completion.choices[0]?.message?.content?.trim();
+  if (!text) {
+    throw new Error("EMPTY_COMPLETION");
+  }
+  return text;
+}
+
 function pillarPayload(result) {
   return {
     yearPillar: {
@@ -184,10 +249,38 @@ export async function POST(request) {
 
   const pillarsJson = pillarPayload(pillars);
 
+  if (!process.env.OPENAI_API_KEY) {
+    return new Response(
+      JSON.stringify({
+        error:
+          "서버에 OPENAI_API_KEY 환경 변수가 설정되어 있지 않습니다. Vercel·로컬 환경에 키를 등록한 뒤 다시 시도하세요.",
+      }),
+      { status: 503, headers: jsonHeaders },
+    );
+  }
+
+  let summary;
+  try {
+    summary = await generateAiSummary({
+      name: name.trim(),
+      gender: gender.trim(),
+      birth: String(birth),
+      time: String(time),
+      pillars,
+    });
+  } catch (e) {
+    const message =
+      e instanceof Error ? e.message : "AI 해설 생성 중 오류가 발생했습니다.";
+    return new Response(JSON.stringify({ error: message }), {
+      status: 502,
+      headers: jsonHeaders,
+    });
+  }
+
   return new Response(
     JSON.stringify({
       title: `${name.trim()}님의 사주해설`,
-      summary: `${name.trim()}님은 ${String(birth)} ${String(time)} 출생(${gender.trim()})이며, 사주 원국은 ${pillars.toString()} 입니다.`,
+      summary,
       ...pillarsJson,
     }),
     { headers: jsonHeaders },
