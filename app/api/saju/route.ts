@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 
+/** Vercel/프로덕션에서 라우트가 정적으로 누락되는 경우를 줄이기 위해 명시 */
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 export type SajuRequestBody = {
   name: string;
   birth: string;
@@ -10,6 +14,11 @@ export type SajuRequestBody = {
 export type SajuResponseBody = {
   title: string;
   summary: string;
+};
+
+const GET_RESPONSE: SajuResponseBody = {
+  title: "깊은 물속의 불꽃",
+  summary: "당신은...",
 };
 
 function isNonEmptyString(value: unknown): value is string {
@@ -27,31 +36,8 @@ function buildPayload(input: SajuRequestBody): SajuResponseBody {
   };
 }
 
-/** 브라우저에서 파라미터 없이 열었을 때 보여 줄 고정 예시 응답 */
-const EXAMPLE_GET_RESPONSE: SajuResponseBody = {
-  title: "깊은 물속의 불꽃",
-  summary: "당신은...",
-};
-
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const name = searchParams.get("name");
-  const birth = searchParams.get("birth");
-  const gender = searchParams.get("gender");
-  const time = searchParams.get("time");
-
-  if (
-    isNonEmptyString(name) &&
-    isNonEmptyString(birth) &&
-    isNonEmptyString(gender) &&
-    isNonEmptyString(time)
-  ) {
-    return NextResponse.json(
-      buildPayload({ name, birth, gender, time }) satisfies SajuResponseBody,
-    );
-  }
-
-  return NextResponse.json(EXAMPLE_GET_RESPONSE);
+export function GET() {
+  return NextResponse.json(GET_RESPONSE);
 }
 
 export async function POST(request: Request) {
