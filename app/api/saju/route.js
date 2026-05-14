@@ -2,21 +2,58 @@ import { calculateFourPillars } from "manseryeok";
 import OpenAI from "openai";
 import { MASTER_SYSTEM_PROMPT } from "./master-system-prompt.js";
 
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 const MODEL = "gpt-4o-mini";
 
-/** 마스터 프롬프트 뒤에 붙는 출력·형식 보강(마스터에 동일 내용이 있어도 중복되어도 무방) */
+/** 마스터 프롬프트 뒤에 붙는 JSON 출력 규약(마스터 지침과 충돌 시 이 규약이 최종 출력 형식을 결정한다) */
+const SECTION_TYPES_ORDER = [
+  "core_personality",
+  "five_elements",
+  "day_master",
+  "weakness",
+  "strength",
+  "deep_personality",
+  "career",
+  "wealth",
+  "love",
+  "family",
+  "relationship",
+  "movement_luck",
+  "final_advice",
+];
+
 const RESPONSE_FORMAT_APPENDIX = `
 ---
-[출력 공통 규약]
-- 응답 전체는 한국어 **마크다운**으로 작성한다.
-- 반드시 아래 네 개의 2단계 제목을 **위에서부터 이 순서 그대로** 포함한다(제목 문자열·순서 엄수):
-  ## 성격
-  ## 연애
-  ## 재물
-  ## 직업
-- 각 섹션은 여러 문단으로 나누고, 필요하면 \`- \` 목록·강조(**굵게**)를 사용해 **충분히 길고 깊이 있게** 서술한다.
+[JSON 출력 규약 — 반드시 준수]
+- assistant 메시지 본문에는 **유효한 JSON 객체 하나만** 출력한다. 앞뒤 설명·인사·마크다운 코드펜스(\`\`\`)를 붙이지 않는다.
+- 키는 반드시 "title"(문자열), "sections"(배열) 두 가지만 최상위에 둔다.
+- "title": 사주 서비스 느낌의 감성적 한 줄 제목. 사용자 이름을 넣어 "{이름}님의 사주해설" 형태도 가능하다.
+- "sections": 아래 type 값을 **이 순서 그대로** 13개 요소를 가진 배열. 각 요소는 "type"(문자열), "title"(문자열), "body"(문자열) 필수.
+- 각 "body"는 **500자 이상**(한국어 기준 문자 수)으로, 구체적이고 깊이 있게 작성한다. 짧은 한 줄 요약은 금지.
+- "body" 안에는 마크다운 문법(#, **, \`\`\` 등)을 쓰지 않는다. 순수 평문(줄바꿈은 허용).
+
+sections[].type 순서 (순서·철자 엄수):
+1. core_personality — 핵심 성향 요약
+2. five_elements — 오행 분석
+3. day_master — 일주·십신 중심 분석
+4. weakness — 단점·주의점
+5. strength — 강점·위로
+6. deep_personality — 성격 심층
+7. career — 직업운
+8. wealth — 재물운
+9. love — 연애운
+10. family — 가족운
+11. relationship — 인간관계운
+12. movement_luck — 거주·이동·개운
+13. final_advice — 최종 조언
+
+[작성 톤·내용 지침]
+- sections[].title: 한 줄로 **감성적이고 후킹**되게. 뻔한 제목·상투적 문구는 피한다.
+- sections[].body: 단순 운세 문장 나열이 아니라 **심리 분석·행동 패턴**에 가깝게 서술한다.
+- 일간·월령·오행·십신·합충형파해 등 **명리학 용어를 적절히** 끼워 넣되, 과장된 미신·공포 조장은 금지.
+- **디테일**: 사주 원국에서 읽히는 관계·오행·시간대 등 **구체적 단서**를 짚어, 독자가 **"소름 돋을 만큼" 와닿는** 관찰을 넣는다(허위 사실·사생활 추측·미래 단정은 금지).
+- **위로**와 **직설적인 분석**을 섹션마다 균형 있게 섞는다(한쪽으로만 치우치지 않는다).
 - user 메시지에 주어진 사주 원국·입력값만 근거로 하고, 없는 사실을 단정하지 않는다.
 `.trim();
 
@@ -115,6 +152,95 @@ function pillarsContextForPrompt(pillars) {
   ].join("\n");
 }
 
+function stripJsonFences(raw) {
+  let t = raw.trim();
+  if (t.startsWith("```")) {
+    t = t.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/m, "");
+  }
+  return t.trim();
+}
+
+function parseAssistantJson(text) {
+  const cleaned = stripJsonFences(text);
+  return JSON.parse(cleaned);
+}
+
+/** 유니코드 코드포인트 기준 길이(한글 1음절 = 1) */
+function unicodeCharCount(str) {
+  return [...str].length;
+}
+
+/**
+ * @param {unknown} data
+ * @returns {{ ok: true; value: { title: string; sections: Array<{ type: string; title: string; body: string }> } } | { ok: false; error: string }}
+ */
+function validateInterpretationPayload(data) {
+  if (data === null || typeof data !== "object" || Array.isArray(data)) {
+    return { ok: false, error: "최상위가 객체가 아닙니다." };
+  }
+  const rec = /** @type {Record<string, unknown>} */ (data);
+  if (typeof rec.title !== "string" || !rec.title.trim()) {
+    return { ok: false, error: "title이 비어 있거나 문자열이 아닙니다." };
+  }
+  if (!Array.isArray(rec.sections)) {
+    return { ok: false, error: "sections가 배열이 아닙니다." };
+  }
+  if (rec.sections.length !== SECTION_TYPES_ORDER.length) {
+    return {
+      ok: false,
+      error: `sections 길이는 ${SECTION_TYPES_ORDER.length}이어야 합니다. (실제: ${rec.sections.length})`,
+    };
+  }
+  for (let i = 0; i < SECTION_TYPES_ORDER.length; i++) {
+    const expectedType = SECTION_TYPES_ORDER[i];
+    const item = rec.sections[i];
+    if (item === null || typeof item !== "object" || Array.isArray(item)) {
+      return { ok: false, error: `sections[${i}]가 객체가 아닙니다.` };
+    }
+    const sec = /** @type {Record<string, unknown>} */ (item);
+    if (sec.type !== expectedType) {
+      return {
+        ok: false,
+        error: `sections[${i}].type은 "${expectedType}"이어야 합니다. (실제: ${String(sec.type)})`,
+      };
+    }
+    if (typeof sec.title !== "string" || !sec.title.trim()) {
+      return { ok: false, error: `sections[${i}].title이 비어 있거나 문자열이 아닙니다.` };
+    }
+    if (typeof sec.body !== "string" || !sec.body.trim()) {
+      return { ok: false, error: `sections[${i}].body가 비어 있거나 문자열이 아닙니다.` };
+    }
+    const n = unicodeCharCount(sec.body);
+    if (n < 500) {
+      return {
+        ok: false,
+        error: `sections[${i}].body는 500자 이상이어야 합니다. (실제: ${n}자, type=${expectedType})`,
+      };
+    }
+  }
+  const extraKeys = Object.keys(rec).filter((k) => k !== "title" && k !== "sections");
+  if (extraKeys.length > 0) {
+    return {
+      ok: false,
+      error: `허용되지 않은 최상위 키: ${extraKeys.join(", ")}`,
+    };
+  }
+  return {
+    ok: true,
+    value: {
+      title: rec.title.trim(),
+      sections: rec.sections.map((s) => {
+        const o = /** @type {Record<string, unknown>} */ (s);
+        return {
+          type: String(o.type),
+          title: String(o.title).trim(),
+          body: String(o.body).trim(),
+        };
+      }),
+    },
+  };
+}
+
 /**
  * @param {{
  *   name: string;
@@ -124,7 +250,7 @@ function pillarsContextForPrompt(pillars) {
  *   pillars: import('manseryeok').FourPillarsDetail;
  * }} input
  */
-async function generateAiSummary(input) {
+async function generateAiInterpretationJson(input) {
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const pillarBlock = pillarsContextForPrompt(input.pillars);
 
@@ -137,7 +263,10 @@ async function generateAiSummary(input) {
 - **태어난 시각**: ${input.time}
 
 ## 사주 원국 (만세력 계산 결과)
-${pillarBlock}`;
+${pillarBlock}
+
+## 출력 지시
+응답은 반드시 [JSON 출력 규약]에 맞는 JSON 한 개만 출력하세요. sections는 **13개**이며 type·순서는 규약과 **완전히 동일**해야 합니다. 다른 문장은 쓰지 마세요.`;
 
   const completion = await client.chat.completions.create({
     model: MODEL,
@@ -145,15 +274,29 @@ ${pillarBlock}`;
       { role: "system", content: buildSystemMessage() },
       { role: "user", content: user },
     ],
-    temperature: 0.72,
-    max_tokens: 8192,
+    temperature: 0.65,
+    max_tokens: 16384,
+    response_format: { type: "json_object" },
   });
 
   const text = completion.choices[0]?.message?.content?.trim();
   if (!text) {
     throw new Error("EMPTY_COMPLETION");
   }
-  return text;
+
+  let parsed;
+  try {
+    parsed = parseAssistantJson(text);
+  } catch {
+    throw new Error("AI 응답이 유효한 JSON이 아닙니다.");
+  }
+
+  const validated = validateInterpretationPayload(parsed);
+  if (!validated.ok) {
+    throw new Error(`AI JSON 스키마 검증 실패: ${validated.error}`);
+  }
+
+  return validated.value;
 }
 
 function pillarPayload(result) {
@@ -276,9 +419,9 @@ export async function POST(request) {
     );
   }
 
-  let summary;
+  let interpretation;
   try {
-    summary = await generateAiSummary({
+    interpretation = await generateAiInterpretationJson({
       name: name.trim(),
       gender: gender.trim(),
       birth: String(birth),
@@ -296,8 +439,7 @@ export async function POST(request) {
 
   return new Response(
     JSON.stringify({
-      title: `${name.trim()}님의 사주해설`,
-      summary,
+      ...interpretation,
       ...pillarsJson,
     }),
     { headers: jsonHeaders },
