@@ -1,1 +1,2 @@
 calendarYear,jieId,instantKst,source,confidence,verifiedBy,note
+1997,ipchun,1997-02-04T04:00:00+09:00,unse_wiki_qa,0.85,human:qa-1997-lichun,"운세위키: 02-04 03:50까지 병자/신축, 04:00부터 정축/임인 → 입춘 창구 약 03:50~04:00 KST. 번들 1997-02-03T19:00:00Z(=KST 04:00)과 정합으로 판단."

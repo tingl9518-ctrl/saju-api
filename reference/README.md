@@ -23,3 +23,5 @@ calendarYear,jieId,instantKst,source,confidence,verifiedBy,note
 - `verifiedBy`: 검증 주체(예: `human:홍길동`, `pipeline:ci-123`).
 
 상세 QA·리포트·FAIL 규칙: `docs/jieqi-qa-automation.md`
+
+**1997 입춘:** 운세위키 기준 창구 약 03:50~04:00 KST; 번들은 KST 04:00. 레퍼런스 행·문서에 반영됨.

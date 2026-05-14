@@ -1,4 +1,4 @@
 calendarYear,jieId,instantKst,source,confidence,verifiedBy,note
-1997,ipchun,1997-02-04T05:00:00+09:00,manual_qa,0.7,human:qa-sample,운세위키 기준 예시(실제 검증 시각으로 교체)
+1997,ipchun,1997-02-04T04:00:00+09:00,unse_wiki_qa,0.85,human:qa-1997-lichun,"운세위키: 03:50까지 병자/신축·04:00부터 정축/임인 → 입춘 03:50~04:00 KST 추정. 번들 KST 04:00과 정합."
 1970,ipchun,,kasi_pending,0,,입춘 행 채운 뒤 리포트에 반영
 2035,ipchun,,kasi_pending,0,,입춘 행 채운 뒤 리포트에 반영
