@@ -1,0 +1,200 @@
+{
+  "version": "1",
+  "description": "골든 회귀 — POST /api/saju 와 동일한 computePillarsKorean 경로",
+  "cases": [
+    {
+      "id": "solar-1995-1218-0900",
+      "category": ["solar_normal"],
+      "input": {
+        "calendar": "solar",
+        "year": 1995,
+        "month": 12,
+        "day": 18,
+        "hour": 9,
+        "minute": 0,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "을해",
+        "month": "무자",
+        "day": "계미",
+        "hour": "병진"
+      },
+      "source": { "type": "engine_smoke", "referenceSet": "golden-v1" },
+      "confidence": 1,
+      "note": "엔진 스모크 기준."
+    },
+    {
+      "id": "lichun-1997-0204-0300",
+      "category": ["lichun_boundary", "solar_normal"],
+      "input": {
+        "calendar": "solar",
+        "year": 1997,
+        "month": 2,
+        "day": 4,
+        "hour": 3,
+        "minute": 0,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "병자",
+        "month": "신축",
+        "day": "정축",
+        "hour": "신축"
+      },
+      "source": {
+        "type": "unse_wiki",
+        "label": "운세위키 입춘 전 창구",
+        "capturedAt": "2026-05",
+        "referenceSet": "golden-v1"
+      },
+      "confidence": 0.85,
+      "note": "번들 입춘 KST 04:00 정합 전제."
+    },
+    {
+      "id": "lichun-1997-0204-0500",
+      "category": ["lichun_boundary", "solar_normal"],
+      "input": {
+        "calendar": "solar",
+        "year": 1997,
+        "month": 2,
+        "day": 4,
+        "hour": 5,
+        "minute": 0,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "정축",
+        "month": "임인",
+        "day": "정축",
+        "hour": "임인"
+      },
+      "source": {
+        "type": "unse_wiki",
+        "label": "운세위키 입춘 후",
+        "capturedAt": "2026-05",
+        "referenceSet": "golden-v1"
+      },
+      "confidence": 0.85,
+      "note": ""
+    },
+    {
+      "id": "lichun-1997-0204-0600",
+      "category": ["lichun_boundary", "hour_boundary"],
+      "input": {
+        "calendar": "solar",
+        "year": 1997,
+        "month": 2,
+        "day": 4,
+        "hour": 6,
+        "minute": 0,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "정축",
+        "month": "임인",
+        "day": "정축",
+        "hour": "계묘"
+      },
+      "source": { "type": "engine_smoke", "referenceSet": "golden-v1" },
+      "confidence": 1,
+      "note": "05:00 동일 시지에서 시간 경과 시 시주 전환."
+    },
+    {
+      "id": "jie-daeseol-1995-1208-0700",
+      "category": ["jie_boundary"],
+      "input": {
+        "calendar": "solar",
+        "year": 1995,
+        "month": 12,
+        "day": 8,
+        "hour": 7,
+        "minute": 0,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "을해",
+        "month": "정해",
+        "day": "계유",
+        "hour": "을묘"
+      },
+      "source": { "type": "engine_smoke", "referenceSet": "golden-v1" },
+      "confidence": 1,
+      "note": "대설 직전(분 단위 경계는 별 케이스)."
+    },
+    {
+      "id": "jie-daeseol-1995-1208-0724",
+      "category": ["jie_boundary"],
+      "input": {
+        "calendar": "solar",
+        "year": 1995,
+        "month": 12,
+        "day": 8,
+        "hour": 7,
+        "minute": 24,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "을해",
+        "month": "무자",
+        "day": "계유",
+        "hour": "을묘"
+      },
+      "source": { "type": "engine_smoke", "referenceSet": "golden-v1" },
+      "confidence": 1,
+      "note": "대설 직후."
+    },
+    {
+      "id": "jie-sohan-1996-0106-1831",
+      "category": ["jie_boundary"],
+      "input": {
+        "calendar": "solar",
+        "year": 1996,
+        "month": 1,
+        "day": 6,
+        "hour": 18,
+        "minute": 31,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "을해",
+        "month": "무자",
+        "day": "임인",
+        "hour": "기유"
+      },
+      "source": { "type": "engine_smoke", "referenceSet": "golden-v1" },
+      "confidence": 1,
+      "note": "소한 직전(사주연 1995)."
+    },
+    {
+      "id": "jie-sohan-1996-0106-1832",
+      "category": ["jie_boundary"],
+      "input": {
+        "calendar": "solar",
+        "year": 1996,
+        "month": 1,
+        "day": 6,
+        "hour": 18,
+        "minute": 32,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "을해",
+        "month": "기축",
+        "day": "임인",
+        "hour": "기유"
+      },
+      "source": { "type": "engine_smoke", "referenceSet": "golden-v1" },
+      "confidence": 1,
+      "note": "소한 직후."
+    }
+  ]
+}

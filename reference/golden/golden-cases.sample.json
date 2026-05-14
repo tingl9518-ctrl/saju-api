@@ -1,0 +1,88 @@
+{
+  "version": "0-sample",
+  "description": "스키마 예시. 실제 회귀 세트는 golden-cases.json 등으로 분리·확장.",
+  "cases": [
+    {
+      "id": "solar-1995-1218-0900",
+      "category": ["solar_normal"],
+      "input": {
+        "calendar": "solar",
+        "year": 1995,
+        "month": 12,
+        "day": 18,
+        "hour": 9,
+        "minute": 0,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "을해",
+        "month": "무자",
+        "day": "계미",
+        "hour": "병진"
+      },
+      "source": {
+        "type": "engine_smoke",
+        "referenceSet": "sample"
+      },
+      "confidence": 1,
+      "note": "tests/saju-golden.test.mjs 기존 케이스와 동일."
+    },
+    {
+      "id": "lichun-1997-0204-0300",
+      "category": ["lichun_boundary", "solar_normal"],
+      "input": {
+        "calendar": "solar",
+        "year": 1997,
+        "month": 2,
+        "day": 4,
+        "hour": 3,
+        "minute": 0,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "병자",
+        "month": "신축",
+        "day": "정축",
+        "hour": "신축"
+      },
+      "source": {
+        "type": "unse_wiki",
+        "label": "운세위키 입춘 전 창구",
+        "capturedAt": "2026-05",
+        "referenceSet": "golden-v1-sample"
+      },
+      "confidence": 0.85,
+      "note": "번들 입춘 KST 04:00 정합 전제. 위키 03:50까지 병자/신축."
+    },
+    {
+      "id": "lichun-1997-0204-0500",
+      "category": ["lichun_boundary", "solar_normal"],
+      "input": {
+        "calendar": "solar",
+        "year": 1997,
+        "month": 2,
+        "day": 4,
+        "hour": 5,
+        "minute": 0,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "정축",
+        "month": "임인",
+        "day": "정축",
+        "hour": "임인"
+      },
+      "source": {
+        "type": "unse_wiki",
+        "label": "운세위키 입춘 후",
+        "capturedAt": "2026-05",
+        "referenceSet": "golden-v1-sample"
+      },
+      "confidence": 0.85,
+      "note": "tests/saju-golden.test.mjs 기존 케이스와 동일."
+    }
+  ]
+}

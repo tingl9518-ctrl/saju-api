@@ -4,6 +4,8 @@
 
 **제품·데이터 전략(소스 오브 트루스, lunar-js 비절대 기준):** [`jieqi-strategy.md`](./jieqi-strategy.md).
 
+**엔진 전체(연·월·일·시) 골든 회귀:** [`saju-golden-test-strategy.md`](./saju-golden-test-strategy.md) — 절입 CSV·리포트와 역할이 다름.
+
 ---
 
 ## 1. `reference/jieqi-reference.csv` 필드 제안

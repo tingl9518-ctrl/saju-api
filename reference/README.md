@@ -7,6 +7,7 @@
 | `jieqi-reference.csv` | 국내 기준 **입춘**(및 향후 12절) 시각. 빈 `instantKst` 행은 비교·빌드에서 스킵. |
 | `jieqi-reference.sample.csv` | 스키마·작성 예시. |
 | `manual-overrides.sample.json` | 베이스 번들에 덮어쓸 **임시/부분 패치** 스키마 예시. |
+| `golden/` | `golden-cases.json`(회귀), `golden-cases.sample.json`, README. `npm test` 연동. 설계: `docs/saju-golden-test-strategy.md`. |
 
 상세 파이프라인은 `docs/jieqi-data-pipeline.md`를 참고하세요.
 

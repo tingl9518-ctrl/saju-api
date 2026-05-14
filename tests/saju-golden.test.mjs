@@ -1,87 +1,100 @@
+/**
+ * 골든 회귀: reference/golden/golden-cases.json
+ * 계산 경로: app/api/saju/compute-pillars-korean.js (POST /api/saju 와 동일)
+ */
 import assert from "node:assert/strict";
-import test from "node:test";
-import { calculateFourPillars } from "manseryeok";
+import { readFileSync, existsSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { describe, test } from "node:test";
 import {
-  calculateKoreanMonthPillar,
-  calculateYearPillarFromBaziYear,
-  formatMonthPillarStrings,
-} from "../app/api/saju/korean-month-pillar.js";
-import {
-  calculateKoreanHourPillar,
-  formatHourPillarStrings,
-} from "../app/api/saju/korean-hour-pillar.js";
+  computePillarsKorean,
+  koreanPillarsFromComputed,
+} from "../app/api/saju/compute-pillars-korean.js";
 
-function assertFourPillars(solarY, m, d, h, mi, { year, month, day, hour }) {
-  const pillars = calculateFourPillars({
-    year: solarY,
-    month: m,
-    day: d,
-    hour: h,
-    minute: mi,
-    isLunar: false,
-    isLeapMonth: false,
-  });
-  const monthAdj = calculateKoreanMonthPillar(solarY, m, d, h, mi);
-  const monthFmt = formatMonthPillarStrings(monthAdj);
-  const yearStemBranch = calculateYearPillarFromBaziYear(monthAdj.baziYear);
-  const yearFmt = formatMonthPillarStrings(yearStemBranch);
-  const hourAdj = calculateKoreanHourPillar(pillars.day.heavenlyStem, h, mi);
-  const hourFmt = formatHourPillarStrings(hourAdj);
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const defaultFixturePath = join(__dirname, "../reference/golden/golden-cases.json");
+const fixturePath = process.env.GOLDEN_CASES_PATH ?? defaultFixturePath;
 
-  assert.equal(yearFmt.korean, year, `연주 ${solarY}-${m}-${d} ${h}:${mi}`);
-  assert.equal(monthFmt.korean, month, `월주 ${solarY}-${m}-${d} ${h}:${mi}`);
-  assert.equal(pillars.dayString, day, `일주 ${solarY}-${m}-${d} ${h}:${mi}`);
-  assert.equal(hourFmt.korean, hour, `시주 ${solarY}-${m}-${d} ${h}:${mi}`);
+if (!existsSync(fixturePath)) {
+  throw new Error(
+    `골든 fixture 없음: ${fixturePath}\n` +
+      `reference/golden/golden-cases.json 을 두거나 GOLDEN_CASES_PATH 를 설정하세요.`,
+  );
 }
 
-test("golden: 1995-12-18 09:00 KST → 을해·무자·계미·병진", () => {
-  assertFourPillars(1995, 12, 18, 9, 0, {
-    year: "을해",
-    month: "무자",
-    day: "계미",
-    hour: "병진",
-  });
-});
+const goldenDoc = JSON.parse(readFileSync(fixturePath, "utf8"));
+const cases = goldenDoc.cases;
 
-test("1997-02-04 입춘 전후: 연·월 동일 baziYear (bundle 입춘)", () => {
-  assertFourPillars(1997, 2, 4, 3, 0, {
-    year: "병자",
-    month: "신축",
-    day: "정축",
-    hour: "신축",
-  });
-  assertFourPillars(1997, 2, 4, 5, 0, {
-    year: "정축",
-    month: "임인",
-    day: "정축",
-    hour: "임인",
-  });
-  assertFourPillars(1997, 2, 4, 6, 0, {
-    year: "정축",
-    month: "임인",
-    day: "정축",
-    hour: "계묘",
-  });
-});
+for (const c of cases) {
+  assert.ok(c && typeof c.id === "string", "각 케이스에 id 가 필요합니다.");
+  assert.ok(c.input && typeof c.input === "object", `${c.id}: input 필요`);
+  assert.ok(c.expected && typeof c.expected === "object", `${c.id}: expected 필요`);
+  assert.ok(
+    Array.isArray(c.category) && c.category.length > 0,
+    `${c.id}: category 는 비어 있지 않은 배열이어야 합니다.`,
+  );
+}
 
-test("절입 경계: 대설 직전·직후 (1995-12)", () => {
-  const before = formatMonthPillarStrings(
-    calculateKoreanMonthPillar(1995, 12, 8, 7, 0),
-  ).korean;
-  const after = formatMonthPillarStrings(
-    calculateKoreanMonthPillar(1995, 12, 8, 7, 24),
-  ).korean;
-  assert.equal(before, "정해");
-  assert.equal(after, "무자");
-});
+/**
+ * @param {{ calendar: string; year: number; month: number; day: number; hour: number; minute?: number; isLeapMonth?: boolean }} input
+ */
+function inputToComputeParams(input) {
+  const isLunar = input.calendar === "lunar";
+  return {
+    birth: {
+      year: input.year,
+      month: input.month,
+      day: input.day,
+    },
+    time: {
+      hour: input.hour,
+      minute: input.minute ?? 0,
+    },
+    isLunar,
+    isLeapMonth: Boolean(input.isLeapMonth),
+  };
+}
 
-test("절입 경계: 소한 직전·직후 (1996-01, 사주연 1995)", () => {
-  const before = formatMonthPillarStrings(
-    calculateKoreanMonthPillar(1996, 1, 6, 18, 31),
-  ).korean;
-  const after = formatMonthPillarStrings(
-    calculateKoreanMonthPillar(1996, 1, 6, 18, 32),
-  ).korean;
-  assert.equal(before, "무자");
-  assert.equal(after, "기축");
-});
+/**
+ * @param {{ id: string; expected: Record<string, string> }} c
+ * @param {Record<string, string>} actual
+ */
+function formatPillarMismatch(c, actual) {
+  const keys = ["year", "month", "day", "hour"];
+  const lines = [`case id: ${c.id}`];
+  for (const k of keys) {
+    const exp = c.expected[k];
+    const act = actual[k];
+    if (exp !== act) {
+      lines.push(`${k}: expected "${exp}", actual "${act}"`);
+    }
+  }
+  return lines.join("\n");
+}
+
+function assertGoldenCase(c) {
+  const actual = koreanPillarsFromComputed(
+    computePillarsKorean(inputToComputeParams(c.input)),
+  );
+  const ok =
+    actual.year === c.expected.year &&
+    actual.month === c.expected.month &&
+    actual.day === c.expected.day &&
+    actual.hour === c.expected.hour;
+  if (!ok) {
+    assert.fail(formatPillarMismatch(c, actual));
+  }
+}
+
+const categories = [...new Set(cases.flatMap((c) => c.category ?? []))].sort();
+
+for (const cat of categories) {
+  describe(`golden [${cat}]`, () => {
+    for (const c of cases.filter((x) => (x.category ?? []).includes(cat))) {
+      test(c.id, () => {
+        assertGoldenCase(c);
+      });
+    }
+  });
+}

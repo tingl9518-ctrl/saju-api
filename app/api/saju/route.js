@@ -1,21 +1,9 @@
-import {
-  calculateFourPillars,
-  lunarToSolar,
-  getHeavenlyStemElement,
-  getEarthlyBranchElement,
-} from "manseryeok";
+import { getHeavenlyStemElement, getEarthlyBranchElement } from "manseryeok";
 import OpenAI from "openai";
 import { MASTER_SYSTEM_PROMPT } from "./master-system-prompt.js";
-import {
-  calculateKoreanHourPillar,
-  formatHourPillarStrings,
-} from "./korean-hour-pillar.js";
-import {
-  calculateKoreanMonthPillar,
-  calculateYearPillarFromBaziYear,
-  formatMonthPillarStrings,
-  getSolarTermsBundleMeta,
-} from "./korean-month-pillar.js";
+import { calculateKoreanHourPillar, formatHourPillarStrings } from "./korean-hour-pillar.js";
+import { getSolarTermsBundleMeta } from "./korean-month-pillar.js";
+import { computePillarsKorean } from "./compute-pillars-korean.js";
 
 export const maxDuration = 120;
 
@@ -155,21 +143,6 @@ function isValidTimeRange({ hour, minute }) {
   if (hour < 0 || hour > 23) return false;
   if (minute < 0 || minute > 59) return false;
   return true;
-}
-
-/**
- * 만세력과 동일한 양력 생일(음력 입력 시 변환).
- * @param {{ year: number; month: number; day: number }} datePart
- */
-function resolveSolarBirthDateParts(datePart, isLunar, isLeapMonth) {
-  if (!isLunar) return datePart;
-  const solar = lunarToSolar(
-    datePart.year,
-    datePart.month,
-    datePart.day,
-    isLeapMonth,
-  );
-  return { year: solar.year, month: solar.month, day: solar.day };
 }
 
 /**
@@ -462,75 +435,33 @@ export async function POST(request) {
   }
 
   let pillars;
+  let adjustedYear;
+  let adjustedMonth;
+  let adjustedHour;
   try {
-    pillars = calculateFourPillars({
-      year: datePart.year,
-      month: datePart.month,
-      day: datePart.day,
-      hour: timePart.hour,
-      minute: timePart.minute,
+    const computed = computePillarsKorean({
+      birth: datePart,
+      time: timePart,
       isLunar: Boolean(isLunar),
       isLeapMonth: Boolean(isLeapMonth),
     });
-  } catch (e) {
-    const message =
-      e instanceof Error ? e.message : "사주 계산 중 오류가 발생했습니다.";
-    return new Response(JSON.stringify({ error: message }), {
-      status: 400,
-      headers: jsonHeaders,
-    });
-  }
-
-  const solarBirth = resolveSolarBirthDateParts(
-    datePart,
-    Boolean(isLunar),
-    Boolean(isLeapMonth),
-  );
-
-  let adjustedMonth;
-  let adjustedYear;
-  try {
-    const monthAdj = calculateKoreanMonthPillar(
-      solarBirth.year,
-      solarBirth.month,
-      solarBirth.day,
-      timePart.hour,
-      timePart.minute,
-    );
-    const monthStr = formatMonthPillarStrings(monthAdj);
-    adjustedMonth = {
-      heavenlyStem: monthAdj.heavenlyStem,
-      earthlyBranch: monthAdj.earthlyBranch,
-      korean: monthStr.korean,
-      hanja: monthStr.hanja,
-    };
-    const yearStemBranch = calculateYearPillarFromBaziYear(monthAdj.baziYear);
-    const yearStr = formatMonthPillarStrings(yearStemBranch);
-    adjustedYear = {
-      heavenlyStem: yearStemBranch.heavenlyStem,
-      earthlyBranch: yearStemBranch.earthlyBranch,
-      korean: yearStr.korean,
-      hanja: yearStr.hanja,
-    };
+    pillars = computed.pillars;
+    adjustedYear = computed.adjustedYear;
+    adjustedMonth = computed.adjustedMonth;
+    adjustedHour = computed.adjustedHour;
   } catch (e) {
     const message =
       e instanceof RangeError
         ? e.message
         : e instanceof Error
           ? e.message
-          : "월주(절입) 계산 중 오류가 발생했습니다.";
+          : "사주 계산 중 오류가 발생했습니다.";
     return new Response(JSON.stringify({ error: message }), {
       status: 400,
       headers: jsonHeaders,
     });
   }
 
-  const hourAdj = calculateKoreanHourPillar(
-    pillars.day.heavenlyStem,
-    timePart.hour,
-    timePart.minute,
-  );
-  const adjustedHour = { ...hourAdj, ...formatHourPillarStrings(hourAdj) };
   const pillarsJson = pillarPayload(pillars, adjustedYear, adjustedMonth, adjustedHour);
 
   if (!process.env.OPENAI_API_KEY) {
