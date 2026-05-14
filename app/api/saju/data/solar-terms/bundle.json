@@ -14,7 +14,14 @@
     "sourceNote": "생성 시점의 절입 시각은 npm 패키지 lunar-javascript의 Julian Day 역산 결과이다. 대한민국 관보·월력요항(KASI)과 초 단위 차이가 날 수 있으므로, 상용 서비스 전 별도 검증·교체 파이프라인을 권장한다.",
     "generator": "scripts/build-solar-terms.mjs",
     "generatorPackage": "lunar-javascript",
-    "generatedAt": "2026-05-14T04:38:43.625Z"
+    "generatedAt": "2026-05-14T04:38:43.625Z",
+    "sourceType": "composite",
+    "referenceVersion": null,
+    "manualOverridesApplied": true,
+    "manualOverrideIds": [
+      "1997-lichun-domestic-qa"
+    ],
+    "dataLineageNote": "lunar-javascript 생성 번들에 1997 입춘만 수동 조정(운세위키 QA 경계). 향후 reference/jieqi-reference.csv + manual-overrides 파이프로 이관 예정. 상세: docs/jieqi-data-pipeline.md"
   },
   "lichunUtcByCalendarYear": {
     "1969": "1969-02-04T07:58:52.000Z",

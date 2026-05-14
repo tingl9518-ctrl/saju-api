@@ -1,0 +1,15 @@
+{
+  "$schemaComment": "베이스 bundle.json에 병합할 수동 패치 예시. 실제 파일명은 manual-overrides.json 등으로 두고 .gitignore 여부는 팀 정책에 따름.",
+  "manualOverrideIds": ["1997-lichun-unse-wiki-qa"],
+  "lichunUtcByCalendarYearPatches": {
+    "1997": "1997-02-03T19:00:00.000Z"
+  },
+  "baziyearTermsPatches": [
+    {
+      "baziYear": 1997,
+      "jieIndex": 0,
+      "id": "lichun",
+      "instantUtc": "1997-02-03T19:00:00.000Z"
+    }
+  ]
+}

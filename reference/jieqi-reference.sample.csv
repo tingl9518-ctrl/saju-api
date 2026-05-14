@@ -1,4 +1,4 @@
-calendarYear,jieId,instantKst,source,note
-1997,ipchun,1997-02-04T05:00:00+09:00,manual_qa,운세위키 기준 05:50 이전 입춘 추정
-1970,ipchun,,manual_qa,실제 레퍼런스 시각으로 채운 뒤 비교
-2035,ipchun,,manual_qa,실제 레퍼런스 시각으로 채운 뒤 비교
+calendarYear,jieId,instantKst,source,confidence,verifiedBy,note
+1997,ipchun,1997-02-04T05:00:00+09:00,manual_qa,0.7,human:qa-sample,운세위키 기준 예시(실제 검증 시각으로 교체)
+1970,ipchun,,kasi_pending,0,,입춘 행 채운 뒤 리포트에 반영
+2035,ipchun,,kasi_pending,0,,입춘 행 채운 뒤 리포트에 반영

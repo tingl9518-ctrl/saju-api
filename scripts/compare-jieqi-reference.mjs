@@ -6,7 +6,7 @@
  *   node scripts/compare-jieqi-reference.mjs
  *   node scripts/compare-jieqi-reference.mjs path/to/reference.csv
  *
- * CSV 스키마: calendarYear,jieId,instantKst,source,note
+ * CSV 스키마: calendarYear(또는 year), jieId, instantKst, source, confidence, verifiedBy, note
  * - instantKst: ISO8601 with Asia/Seoul offset (예: 1997-02-04T05:00:00+09:00)
  * - 빈 instantKst 행은 건너뜀
  *
@@ -14,8 +14,9 @@
  *   음수면 번들 입춘이 레퍼런스보다 늦은 시각(예: 번들이 더 늦게 입춘).
  */
 import { readFileSync, existsSync } from "node:fs";
-import { join, dirname, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseJieqiReferenceRows } from "./lib/parse-jieqi-reference-csv.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -34,63 +35,6 @@ const BUNDLE_PATH = join(
 
 /** 입춘 — 레퍼런스 id */
 const LICHUN_IDS = new Set(["ipchun", "lichun", "입춘"]);
-
-/**
- * @param {string} line
- * @returns {string[]}
- */
-function parseCsvLine(line) {
-  const out = [];
-  let cur = "";
-  let inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (c === '"') {
-      if (inQuotes && line[i + 1] === '"') {
-        cur += '"';
-        i++;
-      } else {
-        inQuotes = !inQuotes;
-      }
-    } else if (!inQuotes && c === ",") {
-      out.push(cur);
-      cur = "";
-    } else {
-      cur += c;
-    }
-  }
-  out.push(cur);
-  return out.map((s) => s.trim());
-}
-
-/**
- * @param {string} text
- */
-function parseReferenceCsv(text) {
-  const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
-  if (lines.length < 2) return [];
-  const header = parseCsvLine(lines[0]).map((h) => h.toLowerCase());
-  const idx = (name) => header.indexOf(name);
-  const cy = idx("calendaryear");
-  const ji = idx("jieid");
-  const ins = idx("instantkst");
-  if (cy < 0 || ji < 0 || ins < 0) {
-    throw new Error(
-      "CSV 헤더에 calendarYear, jieId, instantKst 가 필요합니다.",
-    );
-  }
-  const rows = [];
-  for (let n = 1; n < lines.length; n++) {
-    const cells = parseCsvLine(lines[n]);
-    if (cells.length < Math.max(cy, ji, ins) + 1) continue;
-    rows.push({
-      calendarYear: Number(cells[cy]),
-      jieId: String(cells[ji]).trim(),
-      instantKst: String(cells[ins] ?? "").trim(),
-    });
-  }
-  return rows;
-}
 
 /**
  * @param {number} ms
@@ -143,7 +87,7 @@ if (!lichunMap || typeof lichunMap !== "object") {
 }
 
 const csvText = readFileSync(absRef, "utf8");
-const rows = parseReferenceCsv(csvText);
+const rows = parseJieqiReferenceRows(csvText);
 
 const outRows = [];
 for (const r of rows) {
