@@ -30,8 +30,14 @@ const RESPONSE_FORMAT_APPENDIX = `
 - 키는 반드시 "title"(문자열), "sections"(배열) 두 가지만 최상위에 둔다.
 - "title": 사주 서비스 느낌의 감성적 한 줄 제목. 사용자 이름을 넣어 "{이름}님의 사주해설" 형태도 가능하다.
 - "sections": 아래 type 값을 **이 순서 그대로** 13개 요소를 가진 배열. 각 요소는 "type"(문자열), "title"(문자열), "body"(문자열) 필수.
-- 각 "body"는 **500자 이상**(한국어 기준 문자 수)으로, 구체적이고 깊이 있게 작성한다. 짧은 한 줄 요약은 금지.
 - "body" 안에는 마크다운 문법(#, **, \`\`\` 등)을 쓰지 않는다. 순수 평문(줄바꿈은 허용).
+
+[sections[].body 작성 지침 — 글자 수 제한 없음, 분량·깊이만 강조]
+- 각 section의 body는 **너무 짧지 않게** 작성한다.
+- **최소 3~5문단 느낌**으로 충분히 설명한다(문단은 빈 줄로 나눈다).
+- **명리학적 근거** + **현실적 해석** + **조언**을 섞어 포함한다.
+- **단순 요약**이나 한 줄 결론만으로 끝내지 않는다.
+- **한두 문장으로 끝내지 말 것.**
 
 sections[].type 순서 (순서·철자 엄수):
 1. core_personality — 핵심 성향 요약
@@ -50,7 +56,7 @@ sections[].type 순서 (순서·철자 엄수):
 
 [작성 톤·내용 지침]
 - sections[].title: 한 줄로 **감성적이고 후킹**되게. 뻔한 제목·상투적 문구는 피한다.
-- sections[].body: 단순 운세 문장 나열이 아니라 **심리 분석·행동 패턴**에 가깝게 서술한다.
+- sections[].body: 단순 운세 문장 나열이 아니라 **심리 분석·행동 패턴**에 가깝게 서술한다. 위 [sections[].body 작성 지침]을 반드시 따른다.
 - 일간·월령·오행·십신·합충형파해 등 **명리학 용어를 적절히** 끼워 넣되, 과장된 미신·공포 조장은 금지.
 - **디테일**: 사주 원국에서 읽히는 관계·오행·시간대 등 **구체적 단서**를 짚어, 독자가 **"소름 돋을 만큼" 와닿는** 관찰을 넣는다(허위 사실·사생활 추측·미래 단정은 금지).
 - **위로**와 **직설적인 분석**을 섹션마다 균형 있게 섞는다(한쪽으로만 치우치지 않는다).
@@ -165,11 +171,6 @@ function parseAssistantJson(text) {
   return JSON.parse(cleaned);
 }
 
-/** 유니코드 코드포인트 기준 길이(한글 1음절 = 1) */
-function unicodeCharCount(str) {
-  return [...str].length;
-}
-
 /**
  * @param {unknown} data
  * @returns {{ ok: true; value: { title: string; sections: Array<{ type: string; title: string; body: string }> } } | { ok: false; error: string }}
@@ -209,13 +210,6 @@ function validateInterpretationPayload(data) {
     }
     if (typeof sec.body !== "string" || !sec.body.trim()) {
       return { ok: false, error: `sections[${i}].body가 비어 있거나 문자열이 아닙니다.` };
-    }
-    const n = unicodeCharCount(sec.body);
-    if (n < 500) {
-      return {
-        ok: false,
-        error: `sections[${i}].body는 500자 이상이어야 합니다. (실제: ${n}자, type=${expectedType})`,
-      };
     }
   }
   const extraKeys = Object.keys(rec).filter((k) => k !== "title" && k !== "sections");
@@ -266,7 +260,14 @@ async function generateAiInterpretationJson(input) {
 ${pillarBlock}
 
 ## 출력 지시
-응답은 반드시 [JSON 출력 규약]에 맞는 JSON 한 개만 출력하세요. sections는 **13개**이며 type·순서는 규약과 **완전히 동일**해야 합니다. 다른 문장은 쓰지 마세요.`;
+응답은 반드시 [JSON 출력 규약]에 맞는 JSON 한 개만 출력하세요. sections는 **13개**이며 type·순서는 규약과 **완전히 동일**해야 합니다. 다른 문장은 쓰지 마세요.
+
+각 section의 body는:
+- 너무 짧지 않게 작성
+- 최소 3~5문단 느낌으로 충분히 설명(문단은 빈 줄로 구분)
+- 명리학적 근거 + 현실적 해석 + 조언을 포함
+- 단순 요약 금지
+- 한두 문장으로 끝내지 말 것`;
 
   const completion = await client.chat.completions.create({
     model: MODEL,
