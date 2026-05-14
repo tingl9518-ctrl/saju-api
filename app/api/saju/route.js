@@ -1,6 +1,14 @@
-import { calculateFourPillars } from "manseryeok";
+import {
+  calculateFourPillars,
+  getHeavenlyStemElement,
+  getEarthlyBranchElement,
+} from "manseryeok";
 import OpenAI from "openai";
 import { MASTER_SYSTEM_PROMPT } from "./master-system-prompt.js";
+import {
+  calculateKoreanHourPillar,
+  formatHourPillarStrings,
+} from "./korean-hour-pillar.js";
 
 export const maxDuration = 120;
 
@@ -144,17 +152,24 @@ function isValidTimeRange({ hour, minute }) {
 
 /**
  * @param {import('manseryeok').FourPillarsDetail} pillars
+ * @param {{ heavenlyStem: string; earthlyBranch: string; korean: string; hanja: string }} adjustedHour
  */
-function pillarsContextForPrompt(pillars) {
+function pillarsContextForPrompt(pillars, adjustedHour) {
   const o = pillars.toObject();
   const h = pillars.toHanjaObject();
+  const hourStemEl = getHeavenlyStemElement(
+    /** @type {import("manseryeok").HeavenlyStem} */ (adjustedHour.heavenlyStem),
+  );
+  const hourBranchEl = getEarthlyBranchElement(
+    /** @type {import("manseryeok").EarthlyBranch} */ (adjustedHour.earthlyBranch),
+  );
   return [
-    `사주 원국(한글): ${pillars.toString()}`,
-    `사주 원국(한자): ${pillars.toHanjaString()}`,
+    `사주 원국(한글): ${o.year}년주, ${o.month}월주, ${o.day}일주, ${adjustedHour.korean}시주 (시주는 한국형 30분 보정 시진 기준)`,
+    `사주 원국(한자): ${h.year.hanja}年柱, ${h.month.hanja}月柱, ${h.day.hanja}日柱, ${adjustedHour.hanja}時柱`,
     `연주: ${o.year} (${h.year.hanja}) — 천간 오행:${pillars.yearElement.stem}, 지지 오행:${pillars.yearElement.branch}`,
     `월주: ${o.month} (${h.month.hanja}) — 천간 오행:${pillars.monthElement.stem}, 지지 오행:${pillars.monthElement.branch}`,
     `일주: ${o.day} (${h.day.hanja}) — 일간(일주 천간) 오행:${pillars.dayElement.stem}, 지지 오행:${pillars.dayElement.branch}`,
-    `시주: ${o.hour} (${h.hour.hanja}) — 천간 오행:${pillars.hourElement.stem}, 지지 오행:${pillars.hourElement.branch}`,
+    `시주: ${adjustedHour.korean} (${adjustedHour.hanja}) — 천간 오행:${hourStemEl}, 지지 오행:${hourBranchEl}`,
   ].join("\n");
 }
 
@@ -242,11 +257,20 @@ function validateInterpretationPayload(data) {
  *   birth: string;
  *   time: string;
  *   pillars: import('manseryeok').FourPillarsDetail;
+ *   hour: number;
+ *   minute: number;
  * }} input
  */
 async function generateAiInterpretationJson(input) {
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const pillarBlock = pillarsContextForPrompt(input.pillars);
+  const hourAdj = calculateKoreanHourPillar(
+    input.pillars.day.heavenlyStem,
+    input.hour,
+    input.minute,
+  );
+  const hourFmt = formatHourPillarStrings(hourAdj);
+  const adjustedHour = { ...hourAdj, ...hourFmt };
+  const pillarBlock = pillarsContextForPrompt(input.pillars, adjustedHour);
 
   const user = `아래 입력 정보와 사주 원국을 바탕으로 해설을 작성하세요.
 
@@ -300,7 +324,11 @@ ${pillarBlock}
   return validated.value;
 }
 
-function pillarPayload(result) {
+/**
+ * @param {import('manseryeok').FourPillarsDetail} result
+ * @param {{ korean: string; hanja: string; heavenlyStem: string; earthlyBranch: string }} adjustedHour
+ */
+function pillarPayload(result, adjustedHour) {
   return {
     yearPillar: {
       korean: result.yearString,
@@ -321,10 +349,10 @@ function pillarPayload(result) {
       earthlyBranch: result.day.earthlyBranch,
     },
     hourPillar: {
-      korean: result.hourString,
-      hanja: result.hourHanja,
-      heavenlyStem: result.hour.heavenlyStem,
-      earthlyBranch: result.hour.earthlyBranch,
+      korean: adjustedHour.korean,
+      hanja: adjustedHour.hanja,
+      heavenlyStem: adjustedHour.heavenlyStem,
+      earthlyBranch: adjustedHour.earthlyBranch,
     },
   };
 }
@@ -408,7 +436,13 @@ export async function POST(request) {
     });
   }
 
-  const pillarsJson = pillarPayload(pillars);
+  const hourAdj = calculateKoreanHourPillar(
+    pillars.day.heavenlyStem,
+    timePart.hour,
+    timePart.minute,
+  );
+  const adjustedHour = { ...hourAdj, ...formatHourPillarStrings(hourAdj) };
+  const pillarsJson = pillarPayload(pillars, adjustedHour);
 
   if (!process.env.OPENAI_API_KEY) {
     return new Response(
@@ -428,6 +462,8 @@ export async function POST(request) {
       birth: String(birth),
       time: String(time),
       pillars,
+      hour: timePart.hour,
+      minute: timePart.minute,
     });
   } catch (e) {
     const message =
