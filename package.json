@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "node --test tests/*.test.mjs",
-    "build:data": "node scripts/build-solar-terms.mjs"
+    "build:data": "node scripts/build-solar-terms.mjs",
+    "qa:jieqi": "node scripts/compare-jieqi-reference.mjs"
   },
   "dependencies": {
     "manseryeok": "^1.0.1",

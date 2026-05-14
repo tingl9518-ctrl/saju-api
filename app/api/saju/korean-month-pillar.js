@@ -109,6 +109,19 @@ function monthStemIndexFromBaziYear(baziYear, solarMonthRank) {
 }
 
 /**
+ * 입춘 기준 사주연도(baziYear)의 연주(천간·지지). manseryeok getYearPillar(year)와 동일 공식.
+ * @param {number} baziYear
+ */
+export function calculateYearPillarFromBaziYear(baziYear) {
+  const si = ((baziYear - 4) % 10 + 10) % 10;
+  const bi = ((baziYear - 4) % 12 + 12) % 12;
+  return {
+    heavenlyStem: HEAVENLY_STEMS[si],
+    earthlyBranch: EARTHLY_BRANCHES[bi],
+  };
+}
+
+/**
  * 절입 JSON + 입춘 기준 사주연도의 년간으로 월주(천간·지지).
  *
  * @param {number} calendarYear 양력 연

@@ -12,6 +12,7 @@ import {
 } from "./korean-hour-pillar.js";
 import {
   calculateKoreanMonthPillar,
+  calculateYearPillarFromBaziYear,
   formatMonthPillarStrings,
   getSolarTermsBundleMeta,
 } from "./korean-month-pillar.js";
@@ -173,12 +174,19 @@ function resolveSolarBirthDateParts(datePart, isLunar, isLeapMonth) {
 
 /**
  * @param {import('manseryeok').FourPillarsDetail} pillars
+ * @param {{ heavenlyStem: string; earthlyBranch: string; korean: string; hanja: string }} adjustedYear
  * @param {{ heavenlyStem: string; earthlyBranch: string; korean: string; hanja: string }} adjustedMonth
  * @param {{ heavenlyStem: string; earthlyBranch: string; korean: string; hanja: string }} adjustedHour
  */
-function pillarsContextForPrompt(pillars, adjustedMonth, adjustedHour) {
+function pillarsContextForPrompt(pillars, adjustedYear, adjustedMonth, adjustedHour) {
   const o = pillars.toObject();
   const h = pillars.toHanjaObject();
+  const yearStemEl = getHeavenlyStemElement(
+    /** @type {import("manseryeok").HeavenlyStem} */ (adjustedYear.heavenlyStem),
+  );
+  const yearBranchEl = getEarthlyBranchElement(
+    /** @type {import("manseryeok").EarthlyBranch} */ (adjustedYear.earthlyBranch),
+  );
   const monthStemEl = getHeavenlyStemElement(
     /** @type {import("manseryeok").HeavenlyStem} */ (adjustedMonth.heavenlyStem),
   );
@@ -192,9 +200,9 @@ function pillarsContextForPrompt(pillars, adjustedMonth, adjustedHour) {
     /** @type {import("manseryeok").EarthlyBranch} */ (adjustedHour.earthlyBranch),
   );
   return [
-    `사주 원국(한글): ${o.year}년주, ${adjustedMonth.korean}월주, ${o.day}일주, ${adjustedHour.korean}시주 (월주: 절입 JSON, 시주: 한국형 30분 보정 시진)`,
-    `사주 원국(한자): ${h.year.hanja}年柱, ${adjustedMonth.hanja}月柱, ${h.day.hanja}日柱, ${adjustedHour.hanja}時柱`,
-    `연주: ${o.year} (${h.year.hanja}) — 천간 오행:${pillars.yearElement.stem}, 지지 오행:${pillars.yearElement.branch}`,
+    `사주 원국(한글): ${adjustedYear.korean}년주, ${adjustedMonth.korean}월주, ${o.day}일주, ${adjustedHour.korean}시주 (연·월: 절입 테이블 입춘 기준 동일 baziYear / 시주: 한국형 30분 보정 시진)`,
+    `사주 원국(한자): ${adjustedYear.hanja}年柱, ${adjustedMonth.hanja}月柱, ${h.day.hanja}日柱, ${adjustedHour.hanja}時柱`,
+    `연주: ${adjustedYear.korean} (${adjustedYear.hanja}) — 천간 오행:${yearStemEl}, 지지 오행:${yearBranchEl}`,
     `월주: ${adjustedMonth.korean} (${adjustedMonth.hanja}) — 천간 오행:${monthStemEl}, 지지 오행:${monthBranchEl}`,
     `일주: ${o.day} (${h.day.hanja}) — 일간(일주 천간) 오행:${pillars.dayElement.stem}, 지지 오행:${pillars.dayElement.branch}`,
     `시주: ${adjustedHour.korean} (${adjustedHour.hanja}) — 천간 오행:${hourStemEl}, 지지 오행:${hourBranchEl}`,
@@ -285,6 +293,7 @@ function validateInterpretationPayload(data) {
  *   birth: string;
  *   time: string;
  *   pillars: import('manseryeok').FourPillarsDetail;
+ *   adjustedYear: { heavenlyStem: string; earthlyBranch: string; korean: string; hanja: string };
  *   adjustedMonth: { heavenlyStem: string; earthlyBranch: string; korean: string; hanja: string };
  *   hour: number;
  *   minute: number;
@@ -301,6 +310,7 @@ async function generateAiInterpretationJson(input) {
   const adjustedHour = { ...hourAdj, ...hourFmt };
   const pillarBlock = pillarsContextForPrompt(
     input.pillars,
+    input.adjustedYear,
     input.adjustedMonth,
     adjustedHour,
   );
@@ -313,7 +323,7 @@ async function generateAiInterpretationJson(input) {
 - **생년월일**: ${input.birth}
 - **태어난 시각**: ${input.time}
 
-## 사주 원국 (연·일·음양 변환: manseryeok / 월주: 절입 테이블 / 시주: 한국형 시진)
+## 사주 원국 (연·월: 절입 테이블 입춘 기준 baziYear / 일·음양 변환: manseryeok / 시주: 한국형 시진)
 ${pillarBlock}
 
 ## 출력 지시
@@ -359,16 +369,17 @@ ${pillarBlock}
 
 /**
  * @param {import('manseryeok').FourPillarsDetail} result
+ * @param {{ korean: string; hanja: string; heavenlyStem: string; earthlyBranch: string }} adjustedYear
  * @param {{ korean: string; hanja: string; heavenlyStem: string; earthlyBranch: string }} adjustedMonth
  * @param {{ korean: string; hanja: string; heavenlyStem: string; earthlyBranch: string }} adjustedHour
  */
-function pillarPayload(result, adjustedMonth, adjustedHour) {
+function pillarPayload(result, adjustedYear, adjustedMonth, adjustedHour) {
   return {
     yearPillar: {
-      korean: result.yearString,
-      hanja: result.yearHanja,
-      heavenlyStem: result.year.heavenlyStem,
-      earthlyBranch: result.year.earthlyBranch,
+      korean: adjustedYear.korean,
+      hanja: adjustedYear.hanja,
+      heavenlyStem: adjustedYear.heavenlyStem,
+      earthlyBranch: adjustedYear.earthlyBranch,
     },
     monthPillar: {
       korean: adjustedMonth.korean,
@@ -477,6 +488,7 @@ export async function POST(request) {
   );
 
   let adjustedMonth;
+  let adjustedYear;
   try {
     const monthAdj = calculateKoreanMonthPillar(
       solarBirth.year,
@@ -491,6 +503,14 @@ export async function POST(request) {
       earthlyBranch: monthAdj.earthlyBranch,
       korean: monthStr.korean,
       hanja: monthStr.hanja,
+    };
+    const yearStemBranch = calculateYearPillarFromBaziYear(monthAdj.baziYear);
+    const yearStr = formatMonthPillarStrings(yearStemBranch);
+    adjustedYear = {
+      heavenlyStem: yearStemBranch.heavenlyStem,
+      earthlyBranch: yearStemBranch.earthlyBranch,
+      korean: yearStr.korean,
+      hanja: yearStr.hanja,
     };
   } catch (e) {
     const message =
@@ -511,7 +531,7 @@ export async function POST(request) {
     timePart.minute,
   );
   const adjustedHour = { ...hourAdj, ...formatHourPillarStrings(hourAdj) };
-  const pillarsJson = pillarPayload(pillars, adjustedMonth, adjustedHour);
+  const pillarsJson = pillarPayload(pillars, adjustedYear, adjustedMonth, adjustedHour);
 
   if (!process.env.OPENAI_API_KEY) {
     return new Response(
@@ -531,6 +551,7 @@ export async function POST(request) {
       birth: String(birth),
       time: String(time),
       pillars,
+      adjustedYear,
       adjustedMonth,
       hour: timePart.hour,
       minute: timePart.minute,
