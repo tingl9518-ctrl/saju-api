@@ -26,6 +26,8 @@ calendarYear,jieId,instantKst,source,confidence,verifiedBy,note
 
 상세 QA·리포트·FAIL 규칙: `docs/jieqi-qa-automation.md`
 
+**1995 입춘:** 운세위키 기준 2/4 16:00까지 갑술·정축, 17:00부터 을해·무인 → 창구 약 16:00~17:00 KST(오후). CSV `instantKst`는 錨点 `1995-02-04T17:00:00+09:00`. 현 lunar-js 번들은 KST 약 2/5 00:13으로 **~7.2h outlier** — `docs/jieqi-qa-automation.md` 비교 표 참고.
+
 **1997 입춘:** 운세위키 기준 창구 약 03:50~04:00 KST; 번들은 KST 04:00. 레퍼런스 행·문서에 반영됨.
 
 **2001 입춘:** 운세위키 창구 약 03:00~04:00 KST; 현 lunar-js 번들은 KST 11:28대로 **대량 outlier** — CSV·`docs/jieqi-qa-automation.md`에 기록, 리포트로 delta 확인.
