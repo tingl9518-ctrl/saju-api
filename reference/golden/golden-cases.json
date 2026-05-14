@@ -1,6 +1,7 @@
 {
   "version": "1",
   "description": "골든 회귀 — POST /api/saju 와 동일한 computePillarsKorean 경로",
+  "pendingTemplatesNote": "enabled:false 인 행은 운세위키 등으로 expected 채운 뒤 enabled 를 제거하거나 true 로 바꾼다.",
   "cases": [
     {
       "id": "solar-1995-1218-0900",
@@ -195,6 +196,377 @@
       "source": { "type": "engine_smoke", "referenceSet": "golden-v1" },
       "confidence": 1,
       "note": "소한 직후."
+    },
+    {
+      "id": "lunar-leap-1995-0815-1100",
+      "known_mismatch": true,
+      "reason": "월주 mismatch: domestic 절입 bundle 미완성(번들 월건 vs 운세위키 병술). 활성 회귀 제외.",
+      "category": ["lunar_leap"],
+      "input": {
+        "calendar": "lunar",
+        "year": 1995,
+        "month": 8,
+        "day": 15,
+        "hour": 11,
+        "minute": 0,
+        "isLeapMonth": true,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "을해",
+        "month": "병술",
+        "day": "계유",
+        "hour": "정사"
+      },
+      "source": { "type": "unse_wiki_qa", "referenceSet": "golden-wiki-qa" },
+      "confidence": 0.9,
+      "note": "운세위키 QA: 1995년 음력 윤8월 15일 11시 여자. manseryeok 윤→양력 1995-10-09."
+    },
+    {
+      "id": "midnight-zishi-2001-0101-2340",
+      "known_mismatch": true,
+      "reason": "일주·시주 mismatch: 야자시/만자시 정책 미확정(위키 vs manseryeok 양력 일자). 활성 회귀 제외.",
+      "category": ["midnight_calendar", "zishi"],
+      "input": {
+        "calendar": "solar",
+        "year": 2001,
+        "month": 1,
+        "day": 1,
+        "hour": 23,
+        "minute": 40,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "경진",
+        "month": "무자",
+        "day": "을축",
+        "hour": "병자"
+      },
+      "source": { "type": "unse_wiki_qa", "referenceSet": "golden-wiki-qa" },
+      "confidence": 0.9,
+      "note": "운세위키 QA: 2001-01-01 23:40 여자."
+    },
+    {
+      "id": "midnight-zishi-2001-0102-0010",
+      "category": ["midnight_calendar", "zishi"],
+      "input": {
+        "calendar": "solar",
+        "year": 2001,
+        "month": 1,
+        "day": 2,
+        "hour": 0,
+        "minute": 10,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "경진",
+        "month": "무자",
+        "day": "을축",
+        "hour": "병자"
+      },
+      "source": { "type": "unse_wiki_qa", "referenceSet": "golden-wiki-qa" },
+      "confidence": 0.9,
+      "note": "운세위키 QA: 2001-01-02 00:10 여자."
+    },
+    {
+      "id": "hour-boundary-1990-0515-0900",
+      "category": ["hour_boundary"],
+      "input": {
+        "calendar": "solar",
+        "year": 1990,
+        "month": 5,
+        "day": 15,
+        "hour": 9,
+        "minute": 0,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "경오",
+        "month": "신사",
+        "day": "경진",
+        "hour": "경진"
+      },
+      "source": { "type": "unse_wiki_qa", "referenceSet": "golden-wiki-qa" },
+      "confidence": 0.9,
+      "note": "운세위키 QA: 1990-05-15 09:00 여자. 시진 07:30~09:29 진시 끝."
+    },
+    {
+      "id": "hour-boundary-1990-0515-0930",
+      "category": ["hour_boundary"],
+      "input": {
+        "calendar": "solar",
+        "year": 1990,
+        "month": 5,
+        "day": 15,
+        "hour": 9,
+        "minute": 30,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "경오",
+        "month": "신사",
+        "day": "경진",
+        "hour": "신사"
+      },
+      "source": { "type": "unse_wiki_qa", "referenceSet": "golden-wiki-qa" },
+      "confidence": 0.9,
+      "note": "운세위키 QA: 1990-05-15 09:30 여자. 시진 09:30~11:29 사시."
+    },
+    {
+      "id": "lunar-plain-1990-0515-1200",
+      "enabled": false,
+      "category": ["lunar_plain"],
+      "input": {
+        "calendar": "lunar",
+        "year": 1990,
+        "month": 5,
+        "day": 15,
+        "hour": 12,
+        "minute": 0,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "__TODO__",
+        "month": "__TODO__",
+        "day": "__TODO__",
+        "hour": "__TODO__"
+      },
+      "source": {
+        "type": "unse_wiki",
+        "label": "운세위키 만세력 — 음력 평달",
+        "referenceSet": "golden-v2-pending"
+      },
+      "confidence": 0,
+      "note": "음력 일반: 평달·낮 시각. 위키에서 동일 음력·시각 네 기둥 확인 후 expected 채우고 enabled 제거."
+    },
+    {
+      "id": "lunar-plain-2000-0101-1000",
+      "enabled": false,
+      "category": ["lunar_plain"],
+      "input": {
+        "calendar": "lunar",
+        "year": 2000,
+        "month": 1,
+        "day": 1,
+        "hour": 10,
+        "minute": 0,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "__TODO__",
+        "month": "__TODO__",
+        "day": "__TODO__",
+        "hour": "__TODO__"
+      },
+      "source": {
+        "type": "unse_wiki",
+        "label": "운세위키 — 음력 설 근처",
+        "referenceSet": "golden-v2-pending"
+      },
+      "confidence": 0,
+      "note": "음력 일반: 연초 근처 양력 변환·일주 민감. 위키 캡처 권장."
+    },
+    {
+      "id": "lunar-leap-2020-0401-1000",
+      "enabled": false,
+      "category": ["lunar_leap"],
+      "input": {
+        "calendar": "lunar",
+        "year": 2020,
+        "month": 4,
+        "day": 1,
+        "hour": 10,
+        "minute": 0,
+        "isLeapMonth": true,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "__TODO__",
+        "month": "__TODO__",
+        "day": "__TODO__",
+        "hour": "__TODO__"
+      },
+      "source": {
+        "type": "unse_wiki",
+        "label": "운세위키 — 윤4월",
+        "referenceSet": "golden-v2-pending"
+      },
+      "confidence": 0,
+      "note": "음력 윤달: 2020년 윤4월 1일(한국 음력 표). manseryeok lunarToSolar 와 위키 양력일 일치 여부 함께 확인."
+    },
+    {
+      "id": "lunar-leap-2017-0615-0900",
+      "enabled": false,
+      "category": ["lunar_leap"],
+      "input": {
+        "calendar": "lunar",
+        "year": 2017,
+        "month": 6,
+        "day": 15,
+        "hour": 9,
+        "minute": 0,
+        "isLeapMonth": true,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "__TODO__",
+        "month": "__TODO__",
+        "day": "__TODO__",
+        "hour": "__TODO__"
+      },
+      "source": {
+        "type": "unse_wiki",
+        "label": "운세위키 — 윤6월",
+        "referenceSet": "golden-v2-pending"
+      },
+      "confidence": 0,
+      "note": "음력 윤달: 2017년 윤6월(다른 윤달 앵커). 위키에서 윤달 토글 후 동일 시각 기둥 확인."
+    },
+    {
+      "id": "zishi-2000-0101-2300",
+      "enabled": false,
+      "category": ["zishi"],
+      "input": {
+        "calendar": "solar",
+        "year": 2000,
+        "month": 1,
+        "day": 1,
+        "hour": 23,
+        "minute": 0,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "__TODO__",
+        "month": "__TODO__",
+        "day": "__TODO__",
+        "hour": "__TODO__"
+      },
+      "source": {
+        "type": "unse_wiki",
+        "label": "운세위키 — 자시 전반",
+        "referenceSet": "golden-v2-pending"
+      },
+      "confidence": 0,
+      "note": "자시 경계: 23시대 일주·시지(야자/조자) 규칙. 엔진은 한국형 시진(korean-hour-pillar) 기준."
+    },
+    {
+      "id": "zishi-2000-0101-2330",
+      "enabled": false,
+      "category": ["zishi"],
+      "input": {
+        "calendar": "solar",
+        "year": 2000,
+        "month": 1,
+        "day": 1,
+        "hour": 23,
+        "minute": 30,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "__TODO__",
+        "month": "__TODO__",
+        "day": "__TODO__",
+        "hour": "__TODO__"
+      },
+      "source": {
+        "type": "unse_wiki",
+        "label": "운세위키 — 자시 후반",
+        "referenceSet": "golden-v2-pending"
+      },
+      "confidence": 0,
+      "note": "자시 경계: 23:30 전후 시주·일주 변화가 있다면 위키와 맞춰 기록."
+    },
+    {
+      "id": "zishi-2000-0102-0030",
+      "enabled": false,
+      "category": ["zishi"],
+      "input": {
+        "calendar": "solar",
+        "year": 2000,
+        "month": 1,
+        "day": 2,
+        "hour": 0,
+        "minute": 30,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "__TODO__",
+        "month": "__TODO__",
+        "day": "__TODO__",
+        "hour": "__TODO__"
+      },
+      "source": {
+        "type": "unse_wiki",
+        "label": "운세위키 — 자정 직후",
+        "referenceSet": "golden-v2-pending"
+      },
+      "confidence": 0,
+      "note": "자시: 익일 00:30. 전날 23시대와 일주 비교용 페어."
+    },
+    {
+      "id": "midnight-1999-1231-2359",
+      "enabled": false,
+      "category": ["midnight_calendar"],
+      "input": {
+        "calendar": "solar",
+        "year": 1999,
+        "month": 12,
+        "day": 31,
+        "hour": 23,
+        "minute": 59,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "__TODO__",
+        "month": "__TODO__",
+        "day": "__TODO__",
+        "hour": "__TODO__"
+      },
+      "source": {
+        "type": "unse_wiki",
+        "label": "운세위키 — 연말 23:59",
+        "referenceSet": "golden-v2-pending"
+      },
+      "confidence": 0,
+      "note": "00:00 날짜 변경: 연말 마지막 분. 다음 케이스와 일주 연속성 비교."
+    },
+    {
+      "id": "midnight-2000-0101-0000",
+      "enabled": false,
+      "category": ["midnight_calendar"],
+      "input": {
+        "calendar": "solar",
+        "year": 2000,
+        "month": 1,
+        "day": 1,
+        "hour": 0,
+        "minute": 0,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "__TODO__",
+        "month": "__TODO__",
+        "day": "__TODO__",
+        "hour": "__TODO__"
+      },
+      "source": {
+        "type": "unse_wiki",
+        "label": "운세위키 — 신정 00:00",
+        "referenceSet": "golden-v2-pending"
+      },
+      "confidence": 0,
+      "note": "00:00 날짜 변경: 양력 새해 첫 시각. 일주·시주가 전 케이스와 어떻게 이어지는지 위키 기준으로 기록."
     }
   ]
 }

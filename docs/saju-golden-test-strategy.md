@@ -100,6 +100,8 @@
 1. **`GOLDEN_CATEGORY=lichun_boundary`** 같은 env로 특정 카테고리만 돌리기(현재는 전체 실행).
 2. **스키마 검증 강화:** `calendar` enum, `timezone` 고정 검사 등.
 3. **음력·윤달·자시·자정** 케이스를 JSON에 축적(데이터 작업).
+4. **템플릿 행:** `golden-cases.json`에서 `"enabled": false` + `expected`에 `"__TODO__"` 를 두면 `npm test`에서 skip 되고, 운세위키로 값을 채운 뒤 `enabled` 제거 시 회귀에 편입된다(`reference/golden/README.md` 참고).
+5. **`known_mismatch: true`:** 번들·야자시 등 **정책이 확정되기 전** 엔진과 기대값이 어긋나는 행은 **`reason`(필수)** 과 함께 두고 skip 한다. **활성 회귀에 넣지 않는다** — 확정 후 플래그 제거.
 
 ---
 
