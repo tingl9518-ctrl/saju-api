@@ -1,9 +1,32 @@
 import { calculateFourPillars } from "manseryeok";
 import OpenAI from "openai";
+import { MASTER_SYSTEM_PROMPT } from "./master-system-prompt.js";
 
 export const maxDuration = 60;
 
 const MODEL = "gpt-4o-mini";
+
+/** 마스터 프롬프트 뒤에 붙는 출력·형식 보강(마스터에 동일 내용이 있어도 중복되어도 무방) */
+const RESPONSE_FORMAT_APPENDIX = `
+---
+[출력 공통 규약]
+- 응답 전체는 한국어 **마크다운**으로 작성한다.
+- 반드시 아래 네 개의 2단계 제목을 **위에서부터 이 순서 그대로** 포함한다(제목 문자열·순서 엄수):
+  ## 성격
+  ## 연애
+  ## 재물
+  ## 직업
+- 각 섹션은 여러 문단으로 나누고, 필요하면 \`- \` 목록·강조(**굵게**)를 사용해 **충분히 길고 깊이 있게** 서술한다.
+- user 메시지에 주어진 사주 원국·입력값만 근거로 하고, 없는 사실을 단정하지 않는다.
+`.trim();
+
+function buildSystemMessage() {
+  const master = MASTER_SYSTEM_PROMPT.trim();
+  if (!master) {
+    return RESPONSE_FORMAT_APPENDIX;
+  }
+  return `${master}\n\n${RESPONSE_FORMAT_APPENDIX}`;
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -105,31 +128,25 @@ async function generateAiSummary(input) {
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const pillarBlock = pillarsContextForPrompt(input.pillars);
 
-  const system = `당신은 한국 전통 사주명리(만세력·사주팔자)를 바탕으로 해설을 작성하는 도우미입니다.
-반드시 아래에 주어진 「사주 원국」 데이터만 근거로 서술하세요. 과장·단정·불길한 예언은 피하고, 참고용·오락 목적임을 염두에 둔 부드러운 톤을 유지하세요.
+  const user = `아래 입력 정보와 사주 원국을 바탕으로 해설을 작성하세요.
 
-출력은 한국어로 작성하고, 반드시 다음 네 가지 소제목을 순서대로 포함하세요 (각 소제목은 ## 로 시작):
-## 성격
-## 연애
-## 재물
-## 직업
+## 입력 정보
+- **이름**: ${input.name}
+- **성별**: ${input.gender}
+- **생년월일**: ${input.birth}
+- **태어난 시각**: ${input.time}
 
-각 항목은 2~4문단 정도로 구체적으로 쓰되, 사주 원국에 나타난 천간·지지·오행 관계와 연결해 설명하세요.`;
-
-  const user = `이름: ${input.name}
-성별: ${input.gender}
-생년월일·시각(입력값): ${input.birth} / ${input.time}
-
+## 사주 원국 (만세력 계산 결과)
 ${pillarBlock}`;
 
   const completion = await client.chat.completions.create({
     model: MODEL,
     messages: [
-      { role: "system", content: system },
+      { role: "system", content: buildSystemMessage() },
       { role: "user", content: user },
     ],
-    temperature: 0.65,
-    max_tokens: 2000,
+    temperature: 0.72,
+    max_tokens: 8192,
   });
 
   const text = completion.choices[0]?.message?.content?.trim();
