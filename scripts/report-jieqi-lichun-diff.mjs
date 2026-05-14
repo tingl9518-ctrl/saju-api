@@ -45,7 +45,10 @@ function classify(absSec) {
 function percentileAbs(sortedAbs, p) {
   if (sortedAbs.length === 0) return null;
   if (sortedAbs.length === 1) return sortedAbs[0];
-  const idx = Math.floor((sortedAbs.length - 1) * p);
+  const idx = Math.min(
+    sortedAbs.length - 1,
+    Math.ceil(p * sortedAbs.length) - 1,
+  );
   return sortedAbs[idx];
 }
 

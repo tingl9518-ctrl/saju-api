@@ -2,6 +2,8 @@
 
 국내 기준 절입 레퍼런스와 `bundle.json`을 **분리·재현·비교** 가능하게 관리하기 위한 구조입니다.
 
+**전략 방향(소스 오브 트루스·운영 목표):** [`jieqi-strategy.md`](./jieqi-strategy.md) — lunar-js 비절대 기준, reference 기반 번들, 장기적으로 수동 패치 대신 CSV 생성.
+
 ---
 
 ## 1. 1997 입춘 수동 수정과의 분리 가능성
@@ -23,12 +25,14 @@
 
 ## 2. `reference/jieqi-reference.csv` → `bundle.json` 전체 재생성
 
+**전제:** 입춘·절입의 **최종 진실은 reference**이며, `lunar-javascript`는 **초안/백필/비교용(seed)** 으로만 쓴다 ([`jieqi-strategy.md`](./jieqi-strategy.md)).
+
 **두 단계 모델을 권장합니다.**
 
 ### A. 입춘만 레퍼런스 (현실적인 1단계)
 
 - CSV: `calendarYear`, `jieId`(ipchun|lichun), `instantKst`, `source`, `note` — **1970~2035 연도별 입춘 한 줄씩**.
-- 빌드: `lunar-javascript`로 **12절 전체**를 생성한 뒤, CSV에 있는 연도에 한해 **입춘 instant만 덮어쓰기** + 해당 사주연 `baziyearTerms[Y][0].instantUtc` 동기화.
+- 빌드(향후 `build-bundle-from-reference.mjs`): **선택**으로 `build-solar-terms.mjs` 출력을 시드로 두고, CSV에 있는 연도에 한해 **입춘 instant만 덮어쓰기** + 해당 사주연 `baziyearTerms[Y][0].instantUtc` 동기화. 시드 없이 reference만으로 입춘 열만 채우는 경로도 가능.
 - 장점: 레퍼런스 입수가 **입춘 66행**으로 끝남.  
 - 주의: 입춘이 밀리면 **인접 사주연의 마지막 절(소한)**과의 시간순 정합을 검증해야 함.
 
@@ -46,6 +50,23 @@
 - **금지:** `if (y === 1997)` 같은 코드 분기.
 - **허용:** `reference/jieqi-reference.csv`(또는 `reference/jieqi/` 아래 연도별 파일)를 **데이터로만** 읽어 루프로 적용.
 - **검증:** 빌드 시 “필수 연도 키 집합(1969~2036 입춘 등)”이 비어 있으면 **실패**시키는 스키마 검증.
+
+---
+
+## 3.1 `build-bundle-from-reference.mjs` (구체 설계 — 구현은 후순위)
+
+**목표:** `bundle.json`을 **reference가 정한 입춘(이후 12절 전체로 확장 가능)**으로 재생성하고, `meta`에 domestic 출처를 박는다.
+
+| 단계 | 내용 |
+|------|------|
+| **입력** | `reference/jieqi-reference.csv`(필수 최소: 입춘 1970–2035). 선택: `manual-overrides.json`, 시드 번들 경로. |
+| **시드(선택)** | `node scripts/build-solar-terms.mjs` 출력 JSON을 읽어 12절·`baziyearTerms` 초기값 생성. **시드 없으면** 입춘만 CSV로 채우고 나머지 절기는 별 정책(추가 CSV 또는 시드 필수)을 문서에 명시. |
+| **병합** | CSV의 `instantKst` → UTC ISO로 변환해 `lichunUtcByCalendarYear[y]` 및 해당 `baziyearTerms[y][0]`(lichun) 동기화. |
+| **검증** | (1) 연도별 시간순 (2) 이전 사주연 소한 ≤ 다음 입춘 (3) `npm run qa:jieqi:report`로 잔여 outlier 정책. |
+| **출력** | `bundle.json`; `meta.sourceType: domestic_reference` 또는 `composite_until_full`, `referenceVersion`, 수동 패치 없음을 목표로 `manualOverridesApplied: false`. |
+| **lunar-js 위치** | **fallback / 초기 생성만.** 최종 운영 산출물의 truth는 CSV·국내 표 ([`jieqi-strategy.md`](./jieqi-strategy.md)). |
+
+**운영 목표:** 성숙 시 **`bundle.json` = domestic reference bundle** 만 배포.
 
 ---
 
@@ -98,11 +119,14 @@
 
 ## 구현 우선순위 (요약)
 
-1. `reference/manual-overrides.json` + `scripts/apply-jieqi-overrides.mjs`로 수동 패치 분리.  
-2. `reference/jieqi-reference.csv` 채우기 → 입춘 덮어쓰기 빌드.  
-3. `report-jieqi-lichun-diff.mjs` + CI 게이트.  
+**당장:** [`jieqi-strategy.md`](./jieqi-strategy.md)에 맞춰 **CSV 입춘 행 축적 + `qa:jieqi:report`로 기준 고정**이 우선. 그다음 아래 순.
+
+1. `reference/manual-overrides.json` + `scripts/apply-jieqi-overrides.mjs`로 수동 패치 분리(과도기).  
+2. `reference/jieqi-reference.csv` 채우기 → §3.1 입춘 덮어쓰기 빌드.  
+3. `report-jieqi-lichun-diff.mjs` + CI 게이트(정책: domestic 번들 전환 전까지는 report-only 가능).  
 4. 선택적 `SOLAR_TERMS_BUNDLE` 경로로 A/B.
 
 이 문서는 **설계 기준**이며, 스크립트는 단계적으로 추가하면 됩니다.
 
+**전략·소스 오브 트루스:** [jieqi-strategy.md](./jieqi-strategy.md).  
 **QA 자동화 세부:** [jieqi-qa-automation.md](./jieqi-qa-automation.md) (`npm run qa:jieqi:report`).

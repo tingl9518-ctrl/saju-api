@@ -2,6 +2,8 @@
 
 계산 엔진과 분리된 **데이터 신뢰·회귀** 레이어입니다.
 
+**제품·데이터 전략(소스 오브 트루스, lunar-js 비절대 기준):** [`jieqi-strategy.md`](./jieqi-strategy.md).
+
 ---
 
 ## 1. `reference/jieqi-reference.csv` 필드 제안
@@ -49,6 +51,34 @@
 - 현재 번들: `1997-02-03T19:00:00.000Z` = **KST 04:00** — 위 창구의 **상한과 일치**하므로 운세위키 기준과 **거의 정합**으로 기록.
 - CSV 반영: `instantKst`는 검증용 **錨点**으로 `1997-02-04T04:00:00+09:00`을 두고, **창구·출처는 `note`**에 남긴다(중간값을 쓰면 `note`에 근거 명시).
 
+**운세위키 QA 사례: 2001 입춘 (창구 vs 현재 번들)**
+
+- 관측: **2월 4일 03:00 KST**까지 경진·기축, **04:00 KST**부터 신사·경인(05:00 동일) → 입춘 **약 03:00~04:00 KST** 구간.
+- **패턴:** 1997과 같이 **새벽 4시 전후**를 경계로 쓰는 관측이 반복됨(위키 UI·그리드 한계 가능).
+- 현재 번들(lunar-javascript): `2001-02-04T02:28:49.000Z` → **KST 약 11:28** — 위키 **錨点 04:00**과 비교 시 **\|Δ\| ≈ 7.5시간(약 26929초)** → 기본 **`JIEQI_TOLERANCE_SEC=300` 밖 → `outlier`**. **tolerance 내 아님.**
+- CSV: `instantKst=2001-02-04T04:00:00+09:00`으로 **창구 상한**을 두고, 차이는 `note`에 명시. `qa:jieqi:report`는 **outlier·FAIL**로 드러나며, **국내 기준 번들 병합 전까지 기대되는 신호**로 보면 됨(1997은 수동 정합으로 exact).
+
+**운세위키 QA 사례: 2024 입춘 (저녁 창구 vs 현재 번들)**
+
+- 관측: **2월 4일 07:00~17:00 KST**까지 계묘·을축, **18:00 KST**부터 갑진·병인 → 입춘 **약 17~18시 KST(저녁)** 구간.
+- **1997·2001과의 차이:** 위키 UI가 **매년 새벽 4시**로 고정된 것이 아니라, **해당 연도 실제 절입 근처**로 그리드가 붙는 패턴(저녁도 발생).
+- 현재 번들(lunar-javascript): `2024-02-04T16:27:07.000Z` → **한국 벽시계 약 2월 5일 01:27 KST** — 위키 **錨点 2월 4일 18:00**과 비교 시 **\|Δ\| ≈ 7.45시간(약 26827초)** → **outlier** (300초 밖).
+- CSV: `instantKst=2024-02-04T18:00:00+09:00`, 창구·번들 UTC는 `note`에 기록.
+
+**입춘 QA 연도별 비교 요약 (운세위키 錨点 vs 현재 bundle)**
+
+| 연도 | 위키 관측 창구(요약) | 위키 錨点 `instantKst` | 번들 `lichunUtc`(UTC) | 번들 KST(요약) | \|Δ\|(초) 대략 | 분류 |
+|------|----------------------|-------------------------|------------------------|----------------|---------------|------|
+| 1997 | 새벽 ~03:50~04:00 | `1997-02-04T04:00:00+09:00` | `1997-02-03T19:00:00.000Z` | 2/4 04:00 | ~0 | **exact** (수동 정합) |
+| 2001 | 새벽 ~03:00~04:00 | `2001-02-04T04:00:00+09:00` | `2001-02-04T02:28:49.000Z` | 2/4 **11:28** | ~26929 | **outlier** |
+| 2024 | 저녁 ~17:00~18:00 | `2024-02-04T18:00:00+09:00` | `2024-02-04T16:27:07.000Z` | 2/**5** **01:27** | ~26827 | **outlier** |
+
+**“연도별 정상 / outlier” 패턴 (가설)**
+
+- **정상(위키와 맞춘 상태):** 1997처럼 **국내/위키 錨点에 맞춘 번들** 또는 천문 표와의 차가 수분 이내.
+- **outlier:** 2001·2024는 **lunar-js 기본 번들**이 위키 錨点과 **수 시간** 벌어짐 → **연도별로 저녁·새벽이 섞이는 위키**와 달리, **lunar-js 쪽이 한 체계(UTC 기준 역산)**로 밀려 **특정 연도만 틀린 것처럼 보이기보다**, 위키·번들 **출처 불일치**가 크게 드러나는 샘플로 보는 것이 타당.
+- **의심 포인트:** (1) **2001·2024처럼 대량 outlier**가 나오는 연도는 `build-solar-terms.mjs` → `getJieQiTable` → JD→UTC 경로와 **위키 그리드**를 **같은 “한국 벽시계 입춘일”**로 놓고 비교했을 때의 오해인지(예: 번들이 **다음날 새벽**으로 넘어가 표기되는 경우) `note`에 **양쪽 모두 ISO**를 적어 두면 원인 조사에 유리. (2) **1997만 수동 패치**되어 있어 연도 간 **번들 품질이 균일하지 않음**.
+
 **tolerance 기준(권장)**
 
 - **CI 기본값 유지:** `JIEQI_TOLERANCE_SEC=300`(5분), `JIEQI_FAIL_MAX_ABS_SEC=300` — 연간 입춘은 천문·표기 차가 보통 이 안에 들어오도록 설계.
@@ -79,11 +109,13 @@
 
 ## 4. `build-bundle-from-reference.mjs` (향후)
 
-1. **입력:** `jieqi-reference.csv`(입춘 전 구간) + 선택 `manual-overrides.json`.
-2. **베이스:** `build-solar-terms.mjs` 출력 또는 동일 로직으로 12절 생성.
+구체 단계표·시드/병합/검증은 **`docs/jieqi-data-pipeline.md` §3.1**에 두고, 여기서는 요약만 한다.
+
+1. **입력:** `jieqi-reference.csv`(입춘 전 구간) + 선택 `manual-overrides.json` + 선택 시드 번들(`build-solar-terms.mjs` 출력).
+2. **베이스:** 시드는 **선택**; `lunar-js`는 **fallback/초기 12절**만 ([`jieqi-strategy.md`](./jieqi-strategy.md)).
 3. **병합:** CSV 입춘으로 `lichunUtcByCalendarYear[y]` 및 `baziyearTerms[y][0]` 동기화; 인접 사주연 시간순 검증.
-4. **출력:** `bundle.json` + `meta.sourceType: domestic_reference`, `referenceVersion`, `manualOverridesApplied`.
-5. **검증:** `npm run qa:jieqi:report`를 같은 파이프에서 실행해 FAIL이면 빌드 실패.
+4. **출력:** `bundle.json` + `meta.sourceType: domestic_reference`(또는 composite), `referenceVersion`.
+5. **검증:** 동일 파이프에서 `npm run qa:jieqi:report`; domestic 번들이 기본이 되기 전에는 **report-only**도 허용 가능.
 
 ---
 
@@ -100,9 +132,11 @@ Next.js 서버에서는 `process.env.SOLAR_TERMS_BUNDLE_PATH`를 읽어 `korean-
 
 ## 6. 우선순위 (데이터 신뢰)
 
-1. CSV 채움 + `qa:jieqi:report`를 CI에 연결.  
-2. `FAIL` 임계값으로 레그레션 방지.  
-3. `build-bundle-from-reference`로 domestic 번들 아티팩트화.  
+**1단계(현재):** [`jieqi-strategy.md`](./jieqi-strategy.md)에 맞춰 **입춘 reference 행 축적**(예: 1995·2001·2024 앵커; 1997은 이미 샘플) + `qa:jieqi:report`로 delta·기준 고정. **구현·엄격 CI FAIL은 그 다음.**
+
+1. CSV 채움 + `qa:jieqi:report`를 CI에 연결(초기에는 아티팩트·경고 위주 가능).  
+2. domestic 번들이 기본이 되면 `FAIL` 임계값으로 레그레션 방지.  
+3. `build-bundle-from-reference`(§4, 파이프라인 §3.1)로 domestic 번들 아티팩트화.  
 4. 런타임 경로 스위치로 스테이징 검증.
 
-이 문서는 `docs/jieqi-data-pipeline.md`와 함께 **데이터 계약**으로 유지합니다.
+이 문서는 `docs/jieqi-data-pipeline.md`, [`jieqi-strategy.md`](./jieqi-strategy.md)와 함께 **데이터 계약**으로 유지합니다.

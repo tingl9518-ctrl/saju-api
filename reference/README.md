@@ -10,6 +10,8 @@
 
 상세 파이프라인은 `docs/jieqi-data-pipeline.md`를 참고하세요.
 
+**전략 방향(국내 체감 = truth, 번들은 reference 재생성):** `docs/jieqi-strategy.md`
+
 ## CSV 스키마
 
 ```text
@@ -25,3 +27,7 @@ calendarYear,jieId,instantKst,source,confidence,verifiedBy,note
 상세 QA·리포트·FAIL 규칙: `docs/jieqi-qa-automation.md`
 
 **1997 입춘:** 운세위키 기준 창구 약 03:50~04:00 KST; 번들은 KST 04:00. 레퍼런스 행·문서에 반영됨.
+
+**2001 입춘:** 운세위키 창구 약 03:00~04:00 KST; 현 lunar-js 번들은 KST 11:28대로 **대량 outlier** — CSV·`docs/jieqi-qa-automation.md`에 기록, 리포트로 delta 확인.
+
+**2024 입춘:** 위키 창구 약 17~18시 KST(저녁); 번들은 **KST 2월 5일 01:27경**으로 위키 18:00 錨点과 **~7.45h outlier**. 연도별 비교 표는 `docs/jieqi-qa-automation.md`.
