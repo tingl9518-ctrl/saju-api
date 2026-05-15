@@ -4,6 +4,11 @@ import {
   formatHourPillarStrings,
 } from "./korean-hour-pillar.js";
 import {
+  calculateKoreanDayPillar,
+  applyKoreanDayPillarToManseryeokDetail,
+  formatDayPillarStrings,
+} from "./korean-day-pillar.js";
+import {
   calculateKoreanMonthPillar,
   calculateYearPillarFromBaziYear,
   formatMonthPillarStrings,
@@ -89,6 +94,21 @@ export function computePillarsKorean({
 
   const monthSolar = useEffectiveSolar ? effectiveSolar : solarBirth;
 
+  const daySolar = monthSolar;
+  const dayAdj = calculateKoreanDayPillar(
+    daySolar.year,
+    daySolar.month,
+    daySolar.day,
+  );
+  applyKoreanDayPillarToManseryeokDetail(pillars, dayAdj);
+  const dayStr = formatDayPillarStrings(dayAdj);
+  const adjustedDay = {
+    heavenlyStem: dayAdj.heavenlyStem,
+    earthlyBranch: dayAdj.earthlyBranch,
+    korean: dayStr.korean,
+    hanja: dayStr.hanja,
+  };
+
   const monthAdj = calculateKoreanMonthPillar(
     monthSolar.year,
     monthSolar.month,
@@ -113,7 +133,7 @@ export function computePillarsKorean({
     hanja: yearStr.hanja,
   };
 
-  let hourDayStem = pillars.day.heavenlyStem;
+  let hourDayStem = dayAdj.heavenlyStem;
   if (isYajaLateZiWindow(time.hour, time.minute)) {
     const nextSolarForHourStem = applyYajaDayRoll(
       solarBirth,
@@ -121,16 +141,11 @@ export function computePillarsKorean({
       time.minute,
       "not_apply",
     );
-    const stemSource = calculateFourPillars({
-      year: nextSolarForHourStem.year,
-      month: nextSolarForHourStem.month,
-      day: nextSolarForHourStem.day,
-      hour: time.hour,
-      minute: time.minute,
-      isLunar: false,
-      isLeapMonth: false,
-    });
-    hourDayStem = stemSource.day.heavenlyStem;
+    hourDayStem = calculateKoreanDayPillar(
+      nextSolarForHourStem.year,
+      nextSolarForHourStem.month,
+      nextSolarForHourStem.day,
+    ).heavenlyStem;
   }
 
   const hourAdj = calculateKoreanHourPillar(
@@ -140,7 +155,14 @@ export function computePillarsKorean({
   );
   const adjustedHour = { ...hourAdj, ...formatHourPillarStrings(hourAdj) };
 
-  return { pillars, adjustedYear, adjustedMonth, adjustedHour, yajaMode };
+  return {
+    pillars,
+    adjustedYear,
+    adjustedMonth,
+    adjustedDay,
+    adjustedHour,
+    yajaMode,
+  };
 }
 
 /**
@@ -151,7 +173,7 @@ export function koreanPillarsFromComputed(computed) {
   return {
     year: computed.adjustedYear.korean,
     month: computed.adjustedMonth.korean,
-    day: computed.pillars.dayString,
+    day: computed.adjustedDay.korean,
     hour: computed.adjustedHour.korean,
   };
 }
