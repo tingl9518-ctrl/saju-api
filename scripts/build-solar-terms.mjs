@@ -1,6 +1,6 @@
 /**
- * 절입(節) 시각 JSON 생성 — MVP: 1969~2036 사주연도(입춘 기준) 구간,
- * 실제 사용 연도 1970~2035 출생을 커버하기 위한 버퍼 포함.
+ * 절입(節) 시각 JSON 생성 — 1899~2101 입춘 맵, 1899~2100 사주연 12절.
+ * 양력 출생 1900~2100 커버(입춘 전후 버퍼 포함).
  *
  * 원천: lunar-javascript (Julian Day → UTC) 천문 역법.
  * 운영 전 KASI 월력요항과 샘플 연도 대조 검증 권장.
@@ -9,6 +9,14 @@ import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Lunar } from "lunar-javascript";
+import {
+  BIRTH_YEAR_MIN,
+  BIRTH_YEAR_MAX,
+  BAZI_YEAR_MIN,
+  BAZI_YEAR_MAX,
+  CALENDAR_LICHUN_MIN,
+  CALENDAR_LICHUN_MAX,
+} from "../app/api/saju/solar-terms-range.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = join(__dirname, "../app/api/saju/data/solar-terms");
@@ -89,11 +97,6 @@ function collectBaziYearTerms(baziYear) {
   return terms;
 }
 
-const BAZI_YEAR_MIN = 1969;
-const BAZI_YEAR_MAX = 2035;
-const CALENDAR_LICHUN_MIN = BAZI_YEAR_MIN;
-const CALENDAR_LICHUN_MAX = 2036;
-
 mkdirSync(OUT_DIR, { recursive: true });
 
 const lichunUtcByCalendarYear = {};
@@ -112,7 +115,7 @@ for (let b = BAZI_YEAR_MIN; b <= BAZI_YEAR_MAX; b++) {
 const bundle = {
   meta: {
     schemaVersion: 1,
-    supportedBirthYearsMvp: [1970, 2035],
+    supportedBirthYearsMvp: [BIRTH_YEAR_MIN, BIRTH_YEAR_MAX],
     baziYearTermsRange: [BAZI_YEAR_MIN, BAZI_YEAR_MAX],
     instantField: "instantUtc",
     instantMeaning:

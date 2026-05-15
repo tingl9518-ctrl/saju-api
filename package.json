@@ -13,7 +13,11 @@
     "build:data": "npm run build:data:lunarjs && npm run build:data:domestic",
     "qa:jieqi": "node scripts/compare-jieqi-reference.mjs",
     "qa:jieqi:report": "node scripts/report-jieqi-lichun-diff.mjs",
-    "qa:jieqi:report:12jie": "node scripts/report-jieqi-12jie-diff.mjs"
+    "qa:jieqi:report:12jie": "node scripts/report-jieqi-12jie-diff.mjs",
+    "export:jieqi-baseline": "node scripts/export-jieqi-baseline.mjs",
+    "qa:jieqi:coverage": "node scripts/report-jieqi-coverage.mjs",
+    "qa:jieqi:lichun-priority": "node scripts/report-jieqi-lichun-priority.mjs",
+    "export:lichun-qa-queue": "node scripts/export-lichun-human-qa-queue.mjs"
   },
   "dependencies": {
     "manseryeok": "^1.0.1",

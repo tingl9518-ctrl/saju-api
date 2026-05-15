@@ -1,7 +1,7 @@
 # Domestic reference 구축 — 연도 우선순위 (계획만)
 
 **목표:** 운세위키와 **입춘 mismatch**가 나는 연도를 **어떤 순서로 `jieqi-reference.csv`(및 병합 파이프)에 반영할지** 정한다.  
-(코드 변경 없음. 이미 적힌 CSV·QA 문서·`docs/domestic-bundle-operations.md` Hybrid 전략을 전제로 한다.)
+(코드 변경 없음. **운영 정책은 `docs/event-driven-sparse-override.md`** — Tier1 feb4/feb5 blind QA **종료**, patch는 **이벤트·증상**만.)
 
 ---
 
@@ -55,10 +55,11 @@
 
 *(실무에서는 ②③④를 병렬로 CSV 검증·출처 보강할 수 있으나, **병합 스크립트 첫 연결 시**는 ①을 반드시 포함한다.)*
 
-### 2차 — **수치 기반 outlier 소진**
+### 2차 — **이벤트 + 수치 outlier (blind Tier1 아님)**
 
-- `qa:jieqi:report` 결과에서 **\|ref − bundle\| > 300초**(또는 팀이 정한 T)인 연도를 **내림차순**으로 CSV 채움.  
-- CSV에 **이미 `instantKst`가 있는데도** 번들이 안 바뀐 상태(병합 전)라면, **병합 배포 후** 동일 리포트로 **재측정**.
+- **우선:** 실사용 mismatch · 경계 생시 fail · 골든 fail · 12절 월주 mismatch (`event-driven-sparse-override.md` T1–T4).  
+- **보조:** `qa:jieqi:report`에서 **\|ref − bundle\| > T** 이고 **위키 錨点 확정**된 연·절만 CSV.  
+- **하지 않음:** feb4/feb5 Tier1 queue 전수 — **10/10 rejected, patch 0**으로 proxy **폐기**.
 
 ### 3차 — **tolerance 이내 잔여**
 
@@ -74,7 +75,7 @@
 
 | 구간 | 현실적 접근 |
 |------|--------------|
-| **1970–2035** | **현 `bundle.json` + API MVP**와 일치. **1~3차**로 **입춘 CSV 전행**을 목표로 두면 된다. |
+| **1970–2035** | **sparse event-driven** — 입춘 **전행 CSV 목표 아님** (예상 **10~16/66연**). 1~3차는 **증상·outlier**만. |
 | **1969·사주연 경계** | 번들에 `BUNDLE_BAZI_YEAR_MIN = 1969` 존재 — **1969 입춘** 등 경계 연도는 **번들 스키마와 함께** 빠르게 1행 추가. |
 | **2036–2100** | **번들 확장**(`build-solar-terms`·스키마·용량) **선행** 없이는 의미 없음. 로드맵 **Phase 2**. |
 | **1900–1968** | **천문·만세력 원천 라이선스·표기 체계** 이슈. **자동 크롤 금지** 전제 시 **수동/OCR 배치** 또는 **공공 데이터** 확보 후 **10년 단위** 롤아웃이 현실적. |
@@ -90,5 +91,6 @@
 - `docs/jieqi-qa-automation.md`  
 - `docs/domestic-bundle-operations.md`  
 - `docs/wiki-divergence-rules.md`  
+- `docs/event-driven-sparse-override.md` — Tier1 종료·patch trigger·792칸 규모  
 
 우선순위는 **리포트 수치·CSV 채움률**이 바뀔 때마다 이 문서의 **2차·3차**만 갱신하면 된다.

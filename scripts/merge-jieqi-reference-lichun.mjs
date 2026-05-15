@@ -11,6 +11,11 @@ import { createHash } from "node:crypto";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseJieqiReferenceRows } from "./lib/parse-jieqi-reference-csv.mjs";
+import {
+  BAZI_YEAR_MIN,
+  BAZI_YEAR_MAX,
+  LICHUN_ONLY_CALENDAR_YEAR,
+} from "../app/api/saju/solar-terms-range.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -143,7 +148,7 @@ function validateBundle(bundle, mergedPatches) {
     const [yStr, bundleJieId] = patch.split(":");
     const y = Number(yStr);
     if (!baziMap[yStr]) {
-      if (y >= 1969 && y <= 2035) {
+      if (y >= BAZI_YEAR_MIN && y <= BAZI_YEAR_MAX) {
         throw new Error(`병합 패치 ${patch}: baziyearTerms[${yStr}] 없음`);
       }
     } else if (findTermIndex(baziMap, yStr, bundleJieId) < 0) {
@@ -200,12 +205,14 @@ function main() {
     const terms = baziMap?.[yKey];
 
     if (!terms?.length) {
-      if (isLichunJieId(csvJieId) && y === 2036) {
+      if (isLichunJieId(csvJieId) && y === LICHUN_ONLY_CALENDAR_YEAR) {
         if (bundle.lichunUtcByCalendarYear) {
           bundle.lichunUtcByCalendarYear[yKey] = utcIso;
         }
         mergedPatches.push(patchKey);
-        warn(`CSV ${patchKey}: baziyearTerms 없음(2036) — lichunUtc 맵만 갱신`);
+        warn(
+          `CSV ${patchKey}: baziyearTerms 없음(${LICHUN_ONLY_CALENDAR_YEAR}) — lichunUtc 맵만 갱신`,
+        );
         continue;
       }
       throw new Error(

@@ -6,14 +6,20 @@ import {
   EARTHLY_BRANCHES,
   EARTHLY_BRANCHES_HANJA,
 } from "manseryeok";
+import {
+  BIRTH_YEAR_MIN,
+  BIRTH_YEAR_MAX,
+  BAZI_YEAR_MIN,
+  BAZI_YEAR_MAX,
+} from "./solar-terms-range.js";
 
 /** MVP 출생 연도(양력 연도 기준, 음력 변환 후에도 동일 검사 권장) */
-export const MVP_BIRTH_YEAR_MIN = 1970;
-export const MVP_BIRTH_YEAR_MAX = 2035;
+export const MVP_BIRTH_YEAR_MIN = BIRTH_YEAR_MIN;
+export const MVP_BIRTH_YEAR_MAX = BIRTH_YEAR_MAX;
 
 /** bundle.json 내 사주연도(입춘 기준) 키 범위와 맞춤 */
-const BUNDLE_BAZI_YEAR_MIN = 1969;
-const BUNDLE_BAZI_YEAR_MAX = 2035;
+const BUNDLE_BAZI_YEAR_MIN = BAZI_YEAR_MIN;
+const BUNDLE_BAZI_YEAR_MAX = BAZI_YEAR_MAX;
 
 let _bundle = null;
 

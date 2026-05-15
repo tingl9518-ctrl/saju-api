@@ -1,5 +1,5 @@
 /**
- * 1970~2035 양력 연도별 입춘: bundle.json vs reference/jieqi-reference.csv
+ * 1900~2100 양력 연도별 입춘: bundle.json vs reference/jieqi-reference.csv
  * 요약·분류 리포트를 reports/ 에 기록한다.
  *
  * 환경변수:
@@ -13,13 +13,11 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseJieqiReferenceRows } from "./lib/parse-jieqi-reference-csv.mjs";
+import { YEAR_MIN, YEAR_MAX } from "./lib/jieqi-grid.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const ROOT = join(__dirname, "..");
-
-const YEAR_MIN = 1970;
-const YEAR_MAX = 2035;
 const LICHUN_IDS = new Set(["ipchun", "lichun", "입춘"]);
 
 const EXACT_MAX_ABS_SEC = Number(process.env.JIEQI_EXACT_MAX_ABS_SEC ?? 1);

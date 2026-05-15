@@ -41,4 +41,5 @@
 - 네 기둥 골든·회귀: [`saju-golden-test-strategy.md`](./saju-golden-test-strategy.md)
 - 레퍼런스 파일 안내: [`../reference/README.md`](../reference/README.md)
 
-**지금은 구현 확대보다, 위 CSV 축적과 `qa:jieqi:report`로 기준을 굳힌 뒤** 번들 생성기·런타임 스위치를 붙인다.
+**지금은 구현 확대보다, event-driven sparse CSV 축적과 `qa:jieqi:report`로 기준을 굳힌 뒤** 번들 생성기·런타임 스위치를 붙인다.  
+운영: [`event-driven-sparse-override.md`](./event-driven-sparse-override.md) (Tier1 blind QA 종료).

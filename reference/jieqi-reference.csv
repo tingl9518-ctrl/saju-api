@@ -3,5 +3,6 @@ calendarYear,jieId,instantKst,source,confidence,verifiedBy,note
 1995,bailu,1995-09-08T11:46:00+09:00,unse_wiki_qa,0.85,human:qa-1995-bailu,"운세위키 QA 확정(2026-05): 09-08 11:45까지 갑신·11:46부터 을유. 병합 전 번들 bailu≈KST 19:48."
 1995,hanlu,1995-10-09T03:25:00+09:00,unse_wiki_qa,0.85,human:qa-1995-hanlu,"운세위키 QA 확정(2026-05): 10-09 03:20까지 을유·03:25부터 병술. lunar-leap-1995-0815-1100 월주 검증용."
 1997,ipchun,1997-02-04T04:00:00+09:00,unse_wiki_qa,0.9,human:qa-1997-lichun,"운세위키 QA 확정(2026-05): 1997-02-04 04:00 KST부터 정축/임인. 번들 1997-02-03T19:00:00.000Z=KST 04:00와 동일 시각 — exact 유지."
+1976,ipchun,1976-02-05T01:50:00+09:00,unse_wiki_qa,0.85,human:qa-1976-lichun,"운세위키 QA 확정(2026-05): 02-05 01:45까지 을묘/기축·01:50부터 병진/경인. 번들 시드 입춘≈09:39 KST."
 2001,ipchun,2001-02-04T03:13:00+09:00,unse_wiki_qa,0.85,human:qa-2001-lichun,"운세위키 QA 확정(2026-05): 2001-02-04 03:13 KST부터 신사/경인."
 2024,ipchun,2024-02-04T17:27:00+09:00,unse_wiki_qa,0.85,human:qa-2024-lichun,"운세위키 QA 확정(2026-05): 2024-02-04 17:27 KST부터 갑진/병인."

@@ -106,6 +106,90 @@
       "note": "05:00 동일 시지에서 시간 경과 시 시주 전환."
     },
     {
+      "id": "lichun-1976-0205-0145",
+      "category": ["lichun_boundary", "solar_normal"],
+      "input": {
+        "calendar": "solar",
+        "year": 1976,
+        "month": 2,
+        "day": 5,
+        "hour": 1,
+        "minute": 45,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "을묘",
+        "month": "기축",
+        "day": "정해",
+        "hour": "신축"
+      },
+      "source": {
+        "type": "unse_wiki",
+        "label": "운세위키 입춘 전 창구",
+        "capturedAt": "2026-05",
+        "referenceSet": "golden-v1"
+      },
+      "confidence": 0.85,
+      "note": "jieqi-reference 1976 입춘 錨点 01:50 KST 직전."
+    },
+    {
+      "id": "lichun-1976-0205-0150",
+      "category": ["lichun_boundary", "solar_normal"],
+      "input": {
+        "calendar": "solar",
+        "year": 1976,
+        "month": 2,
+        "day": 5,
+        "hour": 1,
+        "minute": 50,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "병진",
+        "month": "경인",
+        "day": "정해",
+        "hour": "신축"
+      },
+      "source": {
+        "type": "unse_wiki",
+        "label": "운세위키 입춘 후",
+        "capturedAt": "2026-05",
+        "referenceSet": "golden-v1"
+      },
+      "confidence": 0.85,
+      "note": "jieqi-reference 1976 입춘 錨点 01:50 KST."
+    },
+    {
+      "id": "lichun-1976-0205-0939",
+      "category": ["lichun_boundary", "solar_normal"],
+      "input": {
+        "calendar": "solar",
+        "year": 1976,
+        "month": 2,
+        "day": 5,
+        "hour": 9,
+        "minute": 39,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "병진",
+        "month": "경인",
+        "day": "정해",
+        "hour": "을사"
+      },
+      "source": {
+        "type": "unse_wiki",
+        "label": "운세위키 입춘 후 (구 lunar-js 시드 경계)",
+        "capturedAt": "2026-05",
+        "referenceSet": "golden-v1"
+      },
+      "confidence": 0.85,
+      "note": "병합 전 시드 입춘 09:39 KST 구간 — patch 후 연·월 정합 회귀."
+    },
+    {
       "id": "jie-daeseol-1995-1208-0700",
       "category": ["jie_boundary"],
       "input": {
