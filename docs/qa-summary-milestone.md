@@ -63,7 +63,8 @@
 ### 미확정 정책
 
 - **야자시 / 만자시** — 일주·시주를 “당일 자정 전 子”에 어떻게 묶을지 **제품 규칙 미확정**  
-- **Domestic 번들 = 운영 번들** 전환 시점 및 CI **FAIL vs report-only** 기준
+- **Domestic 번들 = 운영 번들** 전환 시점 및 CI **FAIL vs report-only** 기준  
+- **운세위키와 동일 UX:** 야자시 **옵션 제공 여부·기본값** — 상세는 [`yaja-policy-product-notes.md`](./yaja-policy-product-notes.md)
 
 ### 다음 단계
 
@@ -78,10 +79,13 @@
 
 | 문서 | 용도 |
 |------|------|
+| `docs/RELEASE-READINESS.md` | **출시 준비도** — 가능 영역·미확정·blocker·면책 요약 |
 | `docs/jieqi-strategy.md` | 절입 SoT·lunar-js 비절대 기준 |
 | `docs/jieqi-qa-automation.md` | 절입 QA·분류·비교 표 |
 | `docs/jieqi-data-pipeline.md` | 번들·CSV·병합 설계 |
+| `docs/lichun-mismatch-nature.md` | 입춘 mismatch 성격(버그 vs 데이터·1995·1997·2001·2024) |
 | `docs/saju-golden-test-strategy.md` | 네 기둥 골든·`known_mismatch` |
+| `docs/yaja-policy-product-notes.md` | 야자시 옵션·현재 엔진 기준·영향 범위 |
 | `reference/golden/README.md` | 골든 운영·스킵 규칙 |
 
 본 문서는 **현재 시점 스냅샷**이다. 수치·건수는 이후 QA에서 갱신할 수 있다.
