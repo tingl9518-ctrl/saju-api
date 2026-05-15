@@ -4,6 +4,8 @@
 
 **전략 방향(소스 오브 트루스·운영 목표):** [`jieqi-strategy.md`](./jieqi-strategy.md) — lunar-js 비절대 기준, reference 기반 번들, 장기적으로 수동 패치 대신 CSV 생성.
 
+**운영·전환 실행안(Hybrid 입춘 병합 등):** [`domestic-bundle-operations.md`](./domestic-bundle-operations.md)
+
 ---
 
 ## 1. 1997 입춘 수동 수정과의 분리 가능성
@@ -55,13 +57,15 @@
 
 ## 3.1 `build-bundle-from-reference.mjs` (구체 설계 — 구현은 후순위)
 
+**병합 전용 설계(스크립트명·필드·rollback·구현 순서):** [`merge-jieqi-reference-lichun-design.md`](./merge-jieqi-reference-lichun-design.md)
+
 **목표:** `bundle.json`을 **reference가 정한 입춘(이후 12절 전체로 확장 가능)**으로 재생성하고, `meta`에 domestic 출처를 박는다.
 
 | 단계 | 내용 |
 |------|------|
 | **입력** | `reference/jieqi-reference.csv`(필수 최소: 입춘 1970–2035). 선택: `manual-overrides.json`, 시드 번들 경로. |
-| **시드(선택)** | `node scripts/build-solar-terms.mjs` 출력 JSON을 읽어 12절·`baziyearTerms` 초기값 생성. **시드 없으면** 입춘만 CSV로 채우고 나머지 절기는 별 정책(추가 CSV 또는 시드 필수)을 문서에 명시. |
-| **병합** | CSV의 `instantKst` → UTC ISO로 변환해 `lichunUtcByCalendarYear[y]` 및 해당 `baziyearTerms[y][0]`(lichun) 동기화. |
+| **시드(선택)** | `npm run build:data:lunarjs` → `app/api/saju/data/solar-terms/bundle.lunarjs.json` (`build-solar-terms.mjs --out …`). **시드 없으면** 입춘만 CSV로 채우고 나머지 절기는 별 정책(추가 CSV 또는 시드 필수)을 문서에 명시. |
+| **병합** | `npm run build:data:domestic` — `scripts/merge-jieqi-reference-lichun.mjs`: CSV `instantKst` → UTC로 `lichunUtcByCalendarYear[y]` 및 `baziyearTerms[y][0]`(lichun) 동기화. |
 | **검증** | (1) 연도별 시간순 (2) 이전 사주연 소한 ≤ 다음 입춘 (3) `npm run qa:jieqi:report`로 잔여 outlier 정책. |
 | **출력** | `bundle.json`; `meta.sourceType: domestic_reference` 또는 `composite_until_full`, `referenceVersion`, 수동 패치 없음을 목표로 `manualOverridesApplied: false`. |
 | **lunar-js 위치** | **fallback / 초기 생성만.** 최종 운영 산출물의 truth는 CSV·국내 표 ([`jieqi-strategy.md`](./jieqi-strategy.md)). |

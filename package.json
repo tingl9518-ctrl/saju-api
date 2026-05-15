@@ -8,9 +8,12 @@
     "start": "next start",
     "lint": "eslint",
     "test": "node --test tests/*.test.mjs",
-    "build:data": "node scripts/build-solar-terms.mjs",
+    "build:data:lunarjs": "node scripts/build-solar-terms.mjs --out app/api/saju/data/solar-terms/bundle.lunarjs.json",
+    "build:data:domestic": "node scripts/merge-jieqi-reference-lichun.mjs --seed app/api/saju/data/solar-terms/bundle.lunarjs.json --csv reference/jieqi-reference.csv --out app/api/saju/data/solar-terms/bundle.json",
+    "build:data": "npm run build:data:lunarjs && npm run build:data:domestic",
     "qa:jieqi": "node scripts/compare-jieqi-reference.mjs",
-    "qa:jieqi:report": "node scripts/report-jieqi-lichun-diff.mjs"
+    "qa:jieqi:report": "node scripts/report-jieqi-lichun-diff.mjs",
+    "qa:jieqi:report:12jie": "node scripts/report-jieqi-12jie-diff.mjs"
   },
   "dependencies": {
     "manseryeok": "^1.0.1",

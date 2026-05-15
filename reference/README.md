@@ -27,10 +27,12 @@ calendarYear,jieId,instantKst,source,confidence,verifiedBy,note
 
 상세 QA·리포트·FAIL 규칙: `docs/jieqi-qa-automation.md`
 
-**1995 입춘:** 운세위키 기준 2/4 16:00까지 갑술·정축, 17:00부터 을해·무인 → 창구 약 16:00~17:00 KST(오후). CSV `instantKst`는 錨点 `1995-02-04T17:00:00+09:00`. 현 lunar-js 번들은 KST 약 2/5 00:13으로 **~7.2h outlier** — `docs/jieqi-qa-automation.md` 비교 표 참고.
+**데이터 빌드:** `npm run build:data:lunarjs` → `app/api/saju/data/solar-terms/bundle.lunarjs.json`(시드). `npm run build:data:domestic` → CSV 입춘 병합 후 `bundle.json`. `npm run build:data` = 둘 다 순차 실행.
 
-**1997 입춘:** 운세위키 기준 창구 약 03:50~04:00 KST; 번들은 KST 04:00. 레퍼런스 행·문서에 반영됨.
+**1995 입춘:** 운세위키 QA 확정(2026-05) **2/4 16:19 KST**부터 을해·무인. CSV 錨点 `1995-02-04T16:19:00+09:00`. 현 lunar-js 번들은 KST 약 2/5 00:13으로 **\|Δ\| ≈ 28431초(~7.9h) outlier** — `docs/jieqi-qa-automation.md` 비교 표·`reports/jieqi-lichun-report.json` 참고.
 
-**2001 입춘:** 운세위키 창구 약 03:00~04:00 KST; 현 lunar-js 번들은 KST 11:28대로 **대량 outlier** — CSV·`docs/jieqi-qa-automation.md`에 기록, 리포트로 delta 확인.
+**1997 입춘:** 운세위키 QA 확정 **2/4 04:00 KST**부터 정축·임인; 번들 동일 시각. 레퍼런스 행·문서에 반영됨.
 
-**2024 입춘:** 위키 창구 약 17~18시 KST(저녁); 번들은 **KST 2월 5일 01:27경**으로 위키 18:00 錨点과 **~7.45h outlier**. 연도별 비교 표는 `docs/jieqi-qa-automation.md`.
+**2001 입춘:** 운세위키 QA 확정 **2/4 03:13 KST**부터 신사·경인; 현 lunar-js 번들은 KST 11:28대로 **\|Δ\| ≈ 29749초(~8.3h) outlier**(네 연도 중 최대) — CSV·`docs/jieqi-qa-automation.md`·리포트로 delta 확인.
+
+**2024 입춘:** 운세위키 QA 확정 **2/4 17:27 KST**부터 갑진·병인; 번들은 **KST 2월 5일 01:27경**으로 **\|Δ\| ≈ 28807초(~8.0h) outlier**. 연도별 비교 표는 `docs/jieqi-qa-automation.md`.

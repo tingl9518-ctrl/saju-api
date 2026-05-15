@@ -6,13 +6,21 @@
  * 운영 전 KASI 월력요항과 샘플 연도 대조 검증 권장.
  */
 import { writeFileSync, mkdirSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Lunar } from "lunar-javascript";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = join(__dirname, "../app/api/saju/data/solar-terms");
-const OUT_FILE = join(OUT_DIR, "bundle.json");
+/** 기본: 시드만 쓰고 배포용 bundle.json은 merge 스크립트가 씀(rollback 분리). `--out`으로 덮어쓸 수 있음. */
+let OUT_FILE = join(OUT_DIR, "bundle.lunarjs.json");
+const argv = process.argv.slice(2);
+for (let i = 0; i < argv.length; i++) {
+  if (argv[i] === "--out" && argv[i + 1]) {
+    OUT_FILE = resolve(argv[++i]);
+    i++;
+  }
+}
 
 /** 사주 월을 가르는 12절 (節만, 中气 제외) — 순서 고정 */
 const JIE_CN = [

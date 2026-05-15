@@ -12,18 +12,9 @@
     "instantField": "instantUtc",
     "instantMeaning": "각 절입의 순간을 UTC ISO8601로 저장. 생년월일시는 Asia/Seoul 벽시계로 해석한 뒤 동일 타임라인(UTC ms)으로 비교한다.",
     "sourceNote": "생성 시점의 절입 시각은 npm 패키지 lunar-javascript의 Julian Day 역산 결과이다. 대한민국 관보·월력요항(KASI)과 초 단위 차이가 날 수 있으므로, 상용 서비스 전 별도 검증·교체 파이프라인을 권장한다.",
-    "generator": "scripts/merge-jieqi-reference-lichun.mjs",
+    "generator": "scripts/build-solar-terms.mjs",
     "generatorPackage": "lunar-javascript",
-    "generatedAt": "2026-05-15T06:57:20.239Z",
-    "sourceType": "composite",
-    "referenceVersion": "jieqi-ref-csv:sha256-050a53dfe9c277c7;merged:1995:lichun;1995:bailu;1995:hanlu;1997:lichun;2001:lichun;2024:lichun",
-    "mergedAt": "2026-05-15T06:57:20.239Z",
-    "seedPath": "app/api/saju/data/solar-terms/bundle.lunarjs.json",
-    "seedGeneratedAt": "2026-05-15T06:57:09.566Z",
-    "baseGenerator": "scripts/build-solar-terms.mjs",
-    "manualOverridesApplied": false,
-    "manualOverrideIds": [],
-    "dataLineageNote": "Hybrid: lunar-javascript 시드 + reference/jieqi-reference.csv 절입 병합(입춘·12절 CSV 행). 상세: docs/jieqi-12jie-first-data-design.md"
+    "generatedAt": "2026-05-15T06:57:09.566Z"
   },
   "lichunUtcByCalendarYear": {
     "1969": "1969-02-04T07:58:52.000Z",
@@ -52,13 +43,13 @@
     "1992": "1992-02-04T21:48:17.000Z",
     "1993": "1993-02-04T03:37:09.000Z",
     "1994": "1994-02-04T09:30:55.999Z",
-    "1995": "1995-02-04T07:19:00.000Z",
+    "1995": "1995-02-04T15:12:51.000Z",
     "1996": "1996-02-04T21:07:54.000Z",
-    "1997": "1997-02-03T19:00:00.000Z",
+    "1997": "1997-02-04T03:01:57.000Z",
     "1998": "1998-02-04T08:56:52.000Z",
     "1999": "1999-02-04T14:57:02.999Z",
     "2000": "2000-02-04T20:40:23.999Z",
-    "2001": "2001-02-03T18:13:00.000Z",
+    "2001": "2001-02-04T02:28:49.000Z",
     "2002": "2002-02-04T08:24:04.999Z",
     "2003": "2003-02-04T14:05:20.000Z",
     "2004": "2004-02-04T19:56:12.999Z",
@@ -81,7 +72,7 @@
     "2021": "2021-02-03T22:58:48.000Z",
     "2022": "2022-02-04T04:50:46.999Z",
     "2023": "2023-02-04T10:42:33.000Z",
-    "2024": "2024-02-04T08:27:00.000Z",
+    "2024": "2024-02-04T16:27:07.000Z",
     "2025": "2025-02-03T22:10:28.000Z",
     "2026": "2026-02-04T04:02:08.000Z",
     "2027": "2027-02-04T09:46:18.000Z",
@@ -1399,7 +1390,7 @@
     "1995": [
       {
         "id": "lichun",
-        "instantUtc": "1995-02-04T07:19:00.000Z"
+        "instantUtc": "1995-02-04T15:12:51.000Z"
       },
       {
         "id": "jingzhe",
@@ -1427,11 +1418,11 @@
       },
       {
         "id": "bailu",
-        "instantUtc": "1995-09-08T02:46:00.000Z"
+        "instantUtc": "1995-09-08T10:48:33.999Z"
       },
       {
         "id": "hanlu",
-        "instantUtc": "1995-10-08T18:25:00.000Z"
+        "instantUtc": "1995-10-09T02:27:12.000Z"
       },
       {
         "id": "lidong",
@@ -1499,7 +1490,7 @@
     "1997": [
       {
         "id": "lichun",
-        "instantUtc": "1997-02-03T19:00:00.000Z"
+        "instantUtc": "1997-02-04T03:01:57.000Z"
       },
       {
         "id": "jingzhe",
@@ -1699,7 +1690,7 @@
     "2001": [
       {
         "id": "lichun",
-        "instantUtc": "2001-02-03T18:13:00.000Z"
+        "instantUtc": "2001-02-04T02:28:49.000Z"
       },
       {
         "id": "jingzhe",
@@ -2849,7 +2840,7 @@
     "2024": [
       {
         "id": "lichun",
-        "instantUtc": "2024-02-04T08:27:00.000Z"
+        "instantUtc": "2024-02-04T16:27:07.000Z"
       },
       {
         "id": "jingzhe",

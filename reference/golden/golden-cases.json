@@ -199,8 +199,6 @@
     },
     {
       "id": "lunar-leap-1995-0815-1100",
-      "known_mismatch": true,
-      "reason": "월주 mismatch: domestic 절입 bundle 미완성(번들 월건 vs 운세위키 병술). 활성 회귀 제외.",
       "category": ["lunar_leap"],
       "input": {
         "calendar": "lunar",
