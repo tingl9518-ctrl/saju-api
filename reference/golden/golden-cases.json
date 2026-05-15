@@ -422,6 +422,238 @@
       "note": "운세위키 QA: 1990-05-15 09:30 여자. 시진 09:30~11:29 사시."
     },
     {
+      "id": "regression-final-1902-0317-0822",
+      "category": ["general_regression", "solar_normal"],
+      "input": {
+        "calendar": "solar",
+        "year": 1902,
+        "month": 3,
+        "day": 17,
+        "hour": 8,
+        "minute": 22,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "임인",
+        "month": "계묘",
+        "day": "기해",
+        "hour": "무진"
+      },
+      "source": { "type": "regression_final_qa", "referenceSet": "regression-final-2026-05" },
+      "confidence": 0.9,
+      "note": "최종 회귀 QA #1."
+    },
+    {
+      "id": "regression-final-1918-1231-2341-apply",
+      "category": ["general_regression", "yaja", "zishi", "midnight_calendar"],
+      "input": {
+        "calendar": "solar",
+        "year": 1918,
+        "month": 12,
+        "day": 31,
+        "hour": 23,
+        "minute": 41,
+        "isLeapMonth": false,
+        "yajaMode": "apply",
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "무오",
+        "month": "갑자",
+        "day": "임자",
+        "hour": "임자"
+      },
+      "source": { "type": "regression_final_qa", "referenceSet": "regression-final-2026-05" },
+      "confidence": 0.9,
+      "note": "최종 회귀 QA #2. yajaMode apply."
+    },
+    {
+      "id": "regression-final-1936-lunar-0512-1409",
+      "category": ["general_regression", "lunar_plain"],
+      "input": {
+        "calendar": "lunar",
+        "year": 1936,
+        "month": 5,
+        "day": 12,
+        "hour": 14,
+        "minute": 9,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "병자",
+        "month": "갑오",
+        "day": "계미",
+        "hour": "기미"
+      },
+      "source": { "type": "regression_final_qa", "referenceSet": "regression-final-2026-05" },
+      "confidence": 0.9,
+      "note": "최종 회귀 QA #3."
+    },
+    {
+      "id": "regression-final-1955-0908-1144",
+      "category": ["general_regression", "tz_daypillar", "solar_normal"],
+      "input": {
+        "calendar": "solar",
+        "year": 1955,
+        "month": 9,
+        "day": 8,
+        "hour": 11,
+        "minute": 44,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "을미",
+        "month": "갑신",
+        "day": "임신",
+        "hour": "병오"
+      },
+      "source": { "type": "regression_final_qa", "referenceSet": "regression-final-2026-05" },
+      "confidence": 0.9,
+      "note": "최종 회귀 QA #4. KST 일주(임신)."
+    },
+    {
+      "id": "regression-final-1969-1231-2347-not-apply",
+      "category": ["general_regression", "yaja", "zishi", "midnight_calendar"],
+      "input": {
+        "calendar": "solar",
+        "year": 1969,
+        "month": 12,
+        "day": 31,
+        "hour": 23,
+        "minute": 47,
+        "isLeapMonth": false,
+        "yajaMode": "not_apply",
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "기유",
+        "month": "병자",
+        "day": "신사",
+        "hour": "무자"
+      },
+      "source": { "type": "regression_final_qa", "referenceSet": "regression-final-2026-05" },
+      "confidence": 0.9,
+      "note": "최종 회귀 QA #5. yajaMode not_apply."
+    },
+    {
+      "id": "regression-final-1976-0205-0939",
+      "category": ["general_regression", "lichun_boundary", "solar_normal"],
+      "input": {
+        "calendar": "solar",
+        "year": 1976,
+        "month": 2,
+        "day": 5,
+        "hour": 9,
+        "minute": 39,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "병진",
+        "month": "경인",
+        "day": "정해",
+        "hour": "을사"
+      },
+      "source": { "type": "regression_final_qa", "referenceSet": "regression-final-2026-05" },
+      "confidence": 0.9,
+      "note": "최종 회귀 QA #6. 입춘 CSV 1976."
+    },
+    {
+      "id": "regression-final-1995-lunar-leap-0815-1100",
+      "category": ["general_regression", "lunar_leap"],
+      "input": {
+        "calendar": "lunar",
+        "year": 1995,
+        "month": 8,
+        "day": 15,
+        "hour": 11,
+        "minute": 0,
+        "isLeapMonth": true,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "을해",
+        "month": "병술",
+        "day": "계유",
+        "hour": "정사"
+      },
+      "source": { "type": "regression_final_qa", "referenceSet": "regression-final-2026-05" },
+      "confidence": 0.9,
+      "note": "최종 회귀 QA #7."
+    },
+    {
+      "id": "regression-final-2004-0204-1758",
+      "category": ["general_regression", "lichun_boundary", "solar_normal"],
+      "input": {
+        "calendar": "solar",
+        "year": 2004,
+        "month": 2,
+        "day": 4,
+        "hour": 17,
+        "minute": 58,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "계미",
+        "month": "을축",
+        "day": "계축",
+        "hour": "신유"
+      },
+      "source": { "type": "regression_final_qa", "referenceSet": "regression-final-2026-05" },
+      "confidence": 0.9,
+      "note": "최종 회귀 QA #8."
+    },
+    {
+      "id": "regression-final-2033-1009-0324",
+      "category": ["general_regression", "solar_normal"],
+      "input": {
+        "calendar": "solar",
+        "year": 2033,
+        "month": 10,
+        "day": 9,
+        "hour": 3,
+        "minute": 24,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "계축",
+        "month": "임술",
+        "day": "계사",
+        "hour": "계축"
+      },
+      "source": { "type": "regression_final_qa", "referenceSet": "regression-final-2026-05" },
+      "confidence": 0.9,
+      "note": "최종 회귀 QA #9."
+    },
+    {
+      "id": "regression-final-2098-0621-1837",
+      "category": ["general_regression", "solar_normal"],
+      "input": {
+        "calendar": "solar",
+        "year": 2098,
+        "month": 6,
+        "day": 21,
+        "hour": 18,
+        "minute": 37,
+        "isLeapMonth": false,
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "무오",
+        "month": "무오",
+        "day": "갑신",
+        "hour": "계유"
+      },
+      "source": { "type": "regression_final_qa", "referenceSet": "regression-final-2026-05" },
+      "confidence": 0.9,
+      "note": "최종 회귀 QA #10."
+    },
+    {
       "id": "lunar-plain-1990-0515-1200",
       "enabled": false,
       "category": ["lunar_plain"],
