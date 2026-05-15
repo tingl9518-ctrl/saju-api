@@ -78,7 +78,7 @@ for (const c of cases) {
  */
 function inputToComputeParams(input) {
   const isLunar = input.calendar === "lunar";
-  return {
+  const params = {
     birth: {
       year: input.year,
       month: input.month,
@@ -91,6 +91,10 @@ function inputToComputeParams(input) {
     isLunar,
     isLeapMonth: Boolean(input.isLeapMonth),
   };
+  if (input.yajaMode !== undefined && input.yajaMode !== null) {
+    params.yajaMode = input.yajaMode;
+  }
+  return params;
 }
 
 /**

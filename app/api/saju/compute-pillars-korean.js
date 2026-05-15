@@ -8,6 +8,11 @@ import {
   calculateYearPillarFromBaziYear,
   formatMonthPillarStrings,
 } from "./korean-month-pillar.js";
+import {
+  applyYajaDayRoll,
+  isYajaLateZiWindow,
+  normalizeYajaMode,
+} from "./yaja-solar-birth.js";
 
 /**
  * 만세력과 동일한 양력 생일(음력 입력 시 변환).
@@ -34,31 +39,60 @@ export function resolveSolarBirthDateParts(datePart, isLunar, isLeapMonth) {
  *   time: { hour: number; minute: number };
  *   isLunar: boolean;
  *   isLeapMonth: boolean;
+ *   yajaMode?: import("./yaja-solar-birth.js").YajaMode;
  * }} params
  * @returns {{
  *   pillars: import("manseryeok").FourPillarsDetail;
  *   adjustedYear: { heavenlyStem: string; earthlyBranch: string; korean: string; hanja: string };
  *   adjustedMonth: { heavenlyStem: string; earthlyBranch: string; korean: string; hanja: string };
  *   adjustedHour: { heavenlyStem: string; earthlyBranch: string; korean: string; hanja: string };
+ *   yajaMode: import("./yaja-solar-birth.js").YajaMode;
  * }}
  */
-export function computePillarsKorean({ birth, time, isLunar, isLeapMonth }) {
-  const pillars = calculateFourPillars({
-    year: birth.year,
-    month: birth.month,
-    day: birth.day,
-    hour: time.hour,
-    minute: time.minute,
-    isLunar,
-    isLeapMonth,
-  });
-
+export function computePillarsKorean({
+  birth,
+  time,
+  isLunar,
+  isLeapMonth,
+  yajaMode: yajaModeInput,
+}) {
+  const yajaMode = normalizeYajaMode(yajaModeInput);
   const solarBirth = resolveSolarBirthDateParts(birth, isLunar, isLeapMonth);
+  const effectiveSolar = applyYajaDayRoll(
+    solarBirth,
+    time.hour,
+    time.minute,
+    yajaMode,
+  );
+  const useEffectiveSolar =
+    yajaMode === "not_apply" && isYajaLateZiWindow(time.hour, time.minute);
+
+  const pillars = useEffectiveSolar
+    ? calculateFourPillars({
+        year: effectiveSolar.year,
+        month: effectiveSolar.month,
+        day: effectiveSolar.day,
+        hour: time.hour,
+        minute: time.minute,
+        isLunar: false,
+        isLeapMonth: false,
+      })
+    : calculateFourPillars({
+        year: birth.year,
+        month: birth.month,
+        day: birth.day,
+        hour: time.hour,
+        minute: time.minute,
+        isLunar,
+        isLeapMonth,
+      });
+
+  const monthSolar = useEffectiveSolar ? effectiveSolar : solarBirth;
 
   const monthAdj = calculateKoreanMonthPillar(
-    solarBirth.year,
-    solarBirth.month,
-    solarBirth.day,
+    monthSolar.year,
+    monthSolar.month,
+    monthSolar.day,
     time.hour,
     time.minute,
   );
@@ -86,7 +120,7 @@ export function computePillarsKorean({ birth, time, isLunar, isLeapMonth }) {
   );
   const adjustedHour = { ...hourAdj, ...formatHourPillarStrings(hourAdj) };
 
-  return { pillars, adjustedYear, adjustedMonth, adjustedHour };
+  return { pillars, adjustedYear, adjustedMonth, adjustedHour, yajaMode };
 }
 
 /**

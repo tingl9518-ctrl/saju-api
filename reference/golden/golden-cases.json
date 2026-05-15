@@ -221,9 +221,7 @@
       "note": "운세위키 QA: 1995년 음력 윤8월 15일 11시 여자. manseryeok 윤→양력 1995-10-09."
     },
     {
-      "id": "midnight-zishi-2001-0101-2340",
-      "known_mismatch": true,
-      "reason": "일주·시주 mismatch: 야자시/만자시 정책 미확정(위키 vs manseryeok 양력 일자). 활성 회귀 제외.",
+      "id": "midnight-zishi-2001-0101-2340-apply",
       "category": ["midnight_calendar", "zishi"],
       "input": {
         "calendar": "solar",
@@ -233,6 +231,31 @@
         "hour": 23,
         "minute": 40,
         "isLeapMonth": false,
+        "yajaMode": "apply",
+        "timezone": "Asia/Seoul"
+      },
+      "expected": {
+        "year": "경진",
+        "month": "무자",
+        "day": "갑자",
+        "hour": "갑자"
+      },
+      "source": { "type": "unse_wiki_qa", "referenceSet": "golden-wiki-qa" },
+      "confidence": 0.9,
+      "note": "운세위키 야자시 적용(당일): 2001-01-01 23:40."
+    },
+    {
+      "id": "midnight-zishi-2001-0101-2340-not-apply",
+      "category": ["midnight_calendar", "zishi"],
+      "input": {
+        "calendar": "solar",
+        "year": 2001,
+        "month": 1,
+        "day": 1,
+        "hour": 23,
+        "minute": 40,
+        "isLeapMonth": false,
+        "yajaMode": "not_apply",
         "timezone": "Asia/Seoul"
       },
       "expected": {
@@ -243,7 +266,7 @@
       },
       "source": { "type": "unse_wiki_qa", "referenceSet": "golden-wiki-qa" },
       "confidence": 0.9,
-      "note": "운세위키 QA: 2001-01-01 23:40 여자."
+      "note": "운세위키 야자시 미적용(다음날): 2001-01-01 23:40."
     },
     {
       "id": "midnight-zishi-2001-0102-0010",

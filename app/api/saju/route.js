@@ -1,9 +1,9 @@
 import { getHeavenlyStemElement, getEarthlyBranchElement } from "manseryeok";
 import OpenAI from "openai";
 import { MASTER_SYSTEM_PROMPT } from "./master-system-prompt.js";
-import { calculateKoreanHourPillar, formatHourPillarStrings } from "./korean-hour-pillar.js";
 import { getSolarTermsBundleMeta } from "./korean-month-pillar.js";
 import { computePillarsKorean } from "./compute-pillars-korean.js";
+import { normalizeYajaMode } from "./yaja-solar-birth.js";
 
 export const maxDuration = 120;
 
@@ -268,24 +268,17 @@ function validateInterpretationPayload(data) {
  *   pillars: import('manseryeok').FourPillarsDetail;
  *   adjustedYear: { heavenlyStem: string; earthlyBranch: string; korean: string; hanja: string };
  *   adjustedMonth: { heavenlyStem: string; earthlyBranch: string; korean: string; hanja: string };
- *   hour: number;
- *   minute: number;
+ *   adjustedHour: { heavenlyStem: string; earthlyBranch: string; korean: string; hanja: string };
+ *   yajaMode: import("./yaja-solar-birth.js").YajaMode;
  * }} input
  */
 async function generateAiInterpretationJson(input) {
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const hourAdj = calculateKoreanHourPillar(
-    input.pillars.day.heavenlyStem,
-    input.hour,
-    input.minute,
-  );
-  const hourFmt = formatHourPillarStrings(hourAdj);
-  const adjustedHour = { ...hourAdj, ...hourFmt };
   const pillarBlock = pillarsContextForPrompt(
     input.pillars,
     input.adjustedYear,
     input.adjustedMonth,
-    adjustedHour,
+    input.adjustedHour,
   );
 
   const user = `아래 입력 정보와 사주 원국을 바탕으로 해설을 작성하세요.
@@ -396,7 +389,8 @@ export async function POST(request) {
     );
   }
 
-  const { name, birth, gender, time, isLunar, isLeapMonth } = body ?? {};
+  const { name, birth, gender, time, isLunar, isLeapMonth, yajaMode: yajaModeRaw } =
+    body ?? {};
 
   if (
     typeof name !== "string" ||
@@ -434,6 +428,17 @@ export async function POST(request) {
     );
   }
 
+  let yajaMode;
+  try {
+    yajaMode = normalizeYajaMode(yajaModeRaw);
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "yajaMode 값이 올바르지 않습니다.";
+    return new Response(JSON.stringify({ error: message }), {
+      status: 400,
+      headers: jsonHeaders,
+    });
+  }
+
   let pillars;
   let adjustedYear;
   let adjustedMonth;
@@ -444,11 +449,13 @@ export async function POST(request) {
       time: timePart,
       isLunar: Boolean(isLunar),
       isLeapMonth: Boolean(isLeapMonth),
+      yajaMode,
     });
     pillars = computed.pillars;
     adjustedYear = computed.adjustedYear;
     adjustedMonth = computed.adjustedMonth;
     adjustedHour = computed.adjustedHour;
+    yajaMode = computed.yajaMode;
   } catch (e) {
     const message =
       e instanceof RangeError
@@ -484,8 +491,8 @@ export async function POST(request) {
       pillars,
       adjustedYear,
       adjustedMonth,
-      hour: timePart.hour,
-      minute: timePart.minute,
+      adjustedHour,
+      yajaMode,
     });
   } catch (e) {
     const message =
@@ -500,6 +507,7 @@ export async function POST(request) {
     JSON.stringify({
       ...interpretation,
       ...pillarsJson,
+      yajaMode,
       solarTerms: { meta: getSolarTermsBundleMeta() },
     }),
     { headers: jsonHeaders },
