@@ -51,7 +51,7 @@ describe("computePillarsKorean yaja QA", () => {
   const birth = { year: 2001, month: 1, day: 1 };
   const time = { hour: 23, minute: 40 };
 
-  test("apply: 갑자 / 갑자", () => {
+  test("apply: 갑자 / 병자 (일주 당일, 子時천간 익일)", () => {
     const actual = koreanPillarsFromComputed(
       computePillarsKorean({
         birth,
@@ -62,7 +62,7 @@ describe("computePillarsKorean yaja QA", () => {
       }),
     );
     assert.equal(actual.day, "갑자");
-    assert.equal(actual.hour, "갑자");
+    assert.equal(actual.hour, "병자");
   });
 
   test("not_apply: 을축 / 병자", () => {
@@ -73,6 +73,20 @@ describe("computePillarsKorean yaja QA", () => {
         isLunar: false,
         isLeapMonth: false,
         yajaMode: "not_apply",
+      }),
+    );
+    assert.equal(actual.day, "을축");
+    assert.equal(actual.hour, "병자");
+  });
+
+  test("2001-01-02 00:10 unchanged (no late-zi roll)", () => {
+    const actual = koreanPillarsFromComputed(
+      computePillarsKorean({
+        birth: { year: 2001, month: 1, day: 2 },
+        time: { hour: 0, minute: 10 },
+        isLunar: false,
+        isLeapMonth: false,
+        yajaMode: "apply",
       }),
     );
     assert.equal(actual.day, "을축");

@@ -113,8 +113,28 @@ export function computePillarsKorean({
     hanja: yearStr.hanja,
   };
 
+  let hourDayStem = pillars.day.heavenlyStem;
+  if (isYajaLateZiWindow(time.hour, time.minute)) {
+    const nextSolarForHourStem = applyYajaDayRoll(
+      solarBirth,
+      time.hour,
+      time.minute,
+      "not_apply",
+    );
+    const stemSource = calculateFourPillars({
+      year: nextSolarForHourStem.year,
+      month: nextSolarForHourStem.month,
+      day: nextSolarForHourStem.day,
+      hour: time.hour,
+      minute: time.minute,
+      isLunar: false,
+      isLeapMonth: false,
+    });
+    hourDayStem = stemSource.day.heavenlyStem;
+  }
+
   const hourAdj = calculateKoreanHourPillar(
-    pillars.day.heavenlyStem,
+    hourDayStem,
     time.hour,
     time.minute,
   );

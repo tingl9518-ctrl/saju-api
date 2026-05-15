@@ -238,11 +238,11 @@
         "year": "경진",
         "month": "무자",
         "day": "갑자",
-        "hour": "갑자"
+        "hour": "병자"
       },
       "source": { "type": "unse_wiki_qa", "referenceSet": "golden-wiki-qa" },
       "confidence": 0.9,
-      "note": "운세위키 야자시 적용(당일): 2001-01-01 23:40."
+      "note": "운세위키 야자시 적용(당일): 2001-01-01 23:40. 일주 당일·子時천간 익일 일간(병자)."
     },
     {
       "id": "midnight-zishi-2001-0101-2340-not-apply",
